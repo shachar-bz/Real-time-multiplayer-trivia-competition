@@ -11,7 +11,7 @@ load_dotenv()
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 QUESTIONS_FILE = "questions.csv"
-QUESTIONS_PER_CALL = 4
+QUESTIONS_PER_CALL = 8
 MAX_RETRIES = 2
 
 ANSWER_MODELS = [
@@ -23,7 +23,7 @@ ANSWER_MODELS = [
 ANSWER_SELECTOR_PROMPT = """You are a multiple-choice answer selector.
 
 You will receive:
-- 4 questions
+- {questions_per_call} questions
 - Four possible answers labeled A, B, C, and D for each questions.
 
 Your task is to choose a single correct answer for each question.
@@ -76,8 +76,9 @@ def build_questions_prompt(questions: list[dict]) -> str:
         )
 
     questions_text = "\n\n".join(question_blocks)
+    prompt = ANSWER_SELECTOR_PROMPT.format(questions_per_call=len(questions))
     return (
-        f"{ANSWER_SELECTOR_PROMPT}\n\n"
+        f"{prompt}\n\n"
         f"Questions:\n\n"
         f"{questions_text}"
     )
