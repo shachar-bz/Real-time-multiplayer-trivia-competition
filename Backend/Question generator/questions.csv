@@ -99,150 +99,150 @@ id,topic,difficulty,question,option_a,option_b,option_c,option_d,correct_option
 98,Famous people,4,Who was the first woman to win a Nobel Prize?,Rosalind Franklin,Marie Curie,Ada Lovelace,Dorothy Hodgkin,B
 99,Famous people,6,Which author created the detective Sherlock Holmes?,Agatha Christie,Arthur Conan Doyle,Ian Fleming,Edgar Allan Poe,B
 100,Famous people,5,Which South African leader became president in 1994?,Nelson Mandela,Desmond Tutu,F. W. de Klerk,Thabo Mbeki,A
-103,Sport,3,"In basketball, how many points is a free throw worth?",1,2,3,4,A
-105,Sport,5,"In tennis scoring, what comes after 30?",35,40,45,50,B
-106,Sport,6,What is the maximum score in a single frame of ten-pin bowling?,20,25,30,40,C
-107,Sport,7,Which athlete is known for winning eight gold medals at the 2008 Olympics?,Usain Bolt,Carl Lewis,Mark Spitz,Michael Phelps,D
-108,Sport,8,"In cricket, what is the term for a bowler taking three wickets with three consecutive deliveries?",Hat-trick,Powerplay,Follow-on,Maiden,A
-115,History of Israel,3,Which ancient king is traditionally associated with making Jerusalem the capital of a united Israelite kingdom?,Saul,David,Solomon,Hezekiah,B
-117,History of Israel,4,Who became Israel's first female prime minister in 1969?,Tzipi Livni,Golda Meir,Dalia Itzik,Leah Rabin,B
-119,History of Israel,5,Which Israeli prime minister was assassinated in 1995?,Yitzhak Rabin,Shimon Peres,Ariel Sharon,Ehud Barak,A
-120,History of Israel,7,Which empire controlled the region before the British Mandate began after World War I?,Roman Empire,Ottoman Empire,Byzantine Empire,Persian Empire,B
-123,History of the world,3,The Magna Carta was signed in which country?,France,Spain,England,Italy,C
-125,History of the world,5,What year did Christopher Columbus first reach the Americas?,1492,1517,1607,1776,A
-126,History of the world,6,The Treaty of Versailles officially ended which major conflict?,World War II,Napoleonic Wars,World War I,Crimean War,C
-127,History of the world,7,Which Chinese dynasty is known for beginning construction of the Great Wall's earliest major sections?,Qin,Tang,Song,Ming,A
-128,History of the world,8,The Meiji Restoration began in which year?,1848,1868,1889,1905,B
-129,History of the world,9,Which battle in 732 is often linked to halting Umayyad expansion into Western Europe?,Battle of Hastings,Battle of Tours,Battle of Lepanto,Battle of Vienna,B
-130,History of the world,10,The Peace of Westphalia in 1648 ended which European war?,Seven Years' War,War of Spanish Succession,Thirty Years' War,Hundred Years' War,C
-134,Geography,4,Which country is home to the city of Marrakech?,Algeria,Tunisia,Egypt,Morocco,D
-135,Geography,5,Which mountain range separates Europe from Asia?,Urals,Alps,Andes,Atlas,A
-136,Geography,6,Which sea lies between Italy and the Balkan Peninsula?,Baltic Sea,Adriatic Sea,Black Sea,Aegean Sea,B
-138,Geography,7,Which country has the most natural lakes in the world?,Russia,Brazil,Finland,Canada,D
-139,Geography,8,The Strait of Malacca lies between the Malay Peninsula and which island?,Sumatra,Borneo,Java,Luzon,A
-140,Geography,6,Which African country is completely surrounded by South Africa?,Eswatini,Lesotho,Botswana,Namibia,B
-144,Science,4,What is the chemical symbol for gold?,Ag,Au,Gd,Go,B
-146,Science,6,What type of energy is stored in the bonds of molecules?,Thermal energy,Chemical energy,Kinetic energy,Sound energy,B
-147,Science,7,Which process turns a liquid into a gas below its boiling point?,Condensation,Freezing,Evaporation,Deposition,C
-150,Science,10,"In DNA, which base pairs with adenine?",Cytosine,Guanine,Thymine,Uracil,C
-151,Movies & TV,1,Which animated film features a snowman named Olaf?,Frozen,Moana,Tangled,Brave,A
-153,Movies & TV,3,Who directed the 1993 film Jurassic Park?,James Cameron,George Lucas,Steven Spielberg,Tim Burton,C
-155,Movies & TV,5,"In Breaking Bad, what subject does Walter White teach?",Physics,Biology,Chemistry,Math,C
-157,Movies & TV,4,What is the name of the fictional continent in Game of Thrones where King's Landing is located?,Essos,Westeros,Narnia,Middle-earth,B
-158,Movies & TV,3,"Which movie features the line, 'There's no place like home'?",The Wizard of Oz,Casablanca,Mary Poppins,Singin' in the Rain,A
-159,Movies & TV,7,Which actress played Clarice Starling in The Silence of the Lambs?,Jodie Foster,Meryl Streep,Glenn Close,Susan Sarandon,A
-160,Movies & TV,5,"In The Office, what is the name of the company where the main characters work?",Initech,Dunder Mifflin,Sterling Cooper,Pawnee Paper,B
-162,Technology,2,Which device is commonly used to store files externally?,Monitor,USB flash drive,Keyboard,Router,B
-165,Technology,5,What does HTTPS help provide when browsing websites?,Faster screen brightness,Encrypted communication,More storage space,Better battery life,B
-166,Technology,6,Which component temporarily stores data that a computer is actively using?,RAM,SSD,GPU,ROM,A
-167,Technology,6,"In networking, what does an IP address identify?",A file type,A networked device,A battery level,A screen size,B
-169,Technology,8,What is machine learning primarily concerned with?,Teaching machines to learn from data,Repairing mechanical engines,Increasing monitor resolution,Replacing all computer hardware,A
-170,Technology,9,Which concept is central to blockchain technology?,Central file deletion,Decentralized ledgers,Analog signal tuning,Single-user editing,B
-172,Animals,2,Which animal is the largest mammal on Earth?,African elephant,Blue whale,Hippopotamus,Polar bear,B
-174,Animals,4,What type of animal is a Komodo dragon?,Snake,Lizard,Crocodile,Turtle,B
-179,Animals,9,Which insect is known for producing honey?,Ant,Beetle,Honeybee,Dragonfly,C
-183,Music,2,Which symbol is used to indicate a sharp note in music notation?,#,b,@,&,A
-184,Music,2,Which family of instruments does the cello belong to?,Brass,String,Woodwind,Percussion,B
-185,Music,3,Who composed the famous symphony known as the 'Fifth Symphony'?,Mozart,Bach,Beethoven,Chopin,C
-186,Music,3,What is the term for the speed of a piece of music?,Tempo,Pitch,Harmony,Timbre,A
-188,Music,5,What is the interval between C and G called?,Third,Fourth,Fifth,Sixth,C
-189,Music,6,Which composer wrote 'The Four Seasons'?,Vivaldi,Handel,Haydn,Schubert,A
-190,Music,7,"In Western music theory, how many semitones are in an octave?",8,10,12,14,C
-191,Famous people,1,Who was the first president of the United States?,George Washington,Abraham Lincoln,Thomas Jefferson,John Adams,A
-194,Famous people,3,Which famous leader gave the 'I Have a Dream' speech?,Nelson Mandela,Malcolm X,Barack Obama,Martin Luther King Jr.,D
-196,Famous people,4,Which athlete is often called 'The Greatest' in boxing?,Mike Tyson,Muhammad Ali,Floyd Mayweather,Joe Frazier,B
-198,Famous people,5,Which musician was known as the 'King of Pop'?,Prince,Elvis Presley,Freddie Mercury,Michael Jackson,D
-200,Famous people,6,Which explorer is credited with leading the first expedition to circumnavigate the globe?,Christopher Columbus,Ferdinand Magellan,James Cook,Marco Polo,B
-203,Sport,3,Which sport is associated with the term 'slam dunk'?,Basketball,Volleyball,Baseball,Hockey,A
-204,Sport,4,How many rings are on the Olympic flag?,4,5,6,7,B
-206,Sport,6,Which country won the 2018 FIFA World Cup?,Brazil,Germany,France,Argentina,C
-207,Sport,3,"In golf, what is a score of one under par on a hole called?",Bogey,Birdie,Eagle,Par,B
-209,Sport,7,"In Formula 1, what color flag signals drivers to stop the race immediately?",Yellow,Blue,Red,Green,C
-217,History of Israel,5,Who was the first president of Israel?,Levi Eshkol,Chaim Weizmann,Yitzhak Rabin,Moshe Sharett,B
-218,History of Israel,7,Which Israeli prime minister signed the 1993 Oslo Accords with the Palestine Liberation Organization?,Yitzhak Rabin,Shimon Peres,Ariel Sharon,Ehud Barak,A
-219,History of Israel,6,What was the primary purpose of Operation Magic Carpet in 1949 and 1950?,Airlifting Jews from Yemen,Defending the Galilee,Capturing the Sinai,Building new ports,A
-220,History of Israel,8,Which empire destroyed the Second Temple in Jerusalem in 70 CE?,Babylonian Empire,Persian Empire,Roman Empire,Ottoman Empire,C
-223,History of the world,2,In which year did World War II end?,1918,1939,1945,1950,C
-226,History of the world,4,Which explorer led the first expedition to circumnavigate the globe?,Vasco da Gama,Ferdinand Magellan,James Cook,Henry Hudson,B
-228,History of the world,6,Which dynasty founded by Kublai Khan ruled China from 1271 to 1368?,Tang,Ming,Qing,Yuan,D
-229,History of the world,7,The Berlin Conference of 1884 to 1885 focused mainly on which issue?,Partition of Africa,Unification of Italy,Balkan alliances,Pacific trade routes,A
-230,History of the world,8,Which ancient ruler is linked to one of the earliest known law codes?,Ashoka,Hammurabi,Darius I,Pericles,B
-231,Geography,1,What is the largest ocean on Earth?,Atlantic Ocean,Indian Ocean,Pacific Ocean,Arctic Ocean,C
-232,Geography,2,Which continent is the Sahara Desert located in?,Asia,Africa,Australia,Europe,B
-233,Geography,3,Which river is the longest in the world?,Nile River,Amazon River,Yangtze River,Mississippi River,A
-235,Geography,5,"Which country has the most time zones, including overseas territories?",Russia,France,United States,Australia,B
-238,Geography,8,Which lake is the deepest freshwater lake in the world?,Lake Superior,Lake Tanganyika,Lake Baikal,Lake Victoria,C
-239,Geography,9,The Strait of Hormuz connects the Persian Gulf to which body of water?,Red Sea,Arabian Sea,Gulf of Oman,Caspian Sea,C
-240,Geography,10,Which country is home to the geographic point known as the Pole of Inaccessibility in Eurasia?,China,Kazakhstan,Mongolia,Russia,A
-246,Science,6,What type of energy is stored in food?,Chemical energy,Sound energy,Light energy,Kinetic energy,A
-247,Science,7,Which blood type is commonly called the universal donor?,AB positive,A negative,O negative,B positive,C
-248,Science,8,What is the SI unit of electric current?,Volt,Watt,Ohm,Ampere,D
-249,Science,9,Which process splits atomic nuclei to release energy?,Fusion,Fission,Condensation,Sublimation,B
-250,Science,10,Which particle has no electric charge and is found in the atomic nucleus?,Proton,Electron,Neutron,Photon,C
-252,Movies & TV,2,"In the TV series Friends, what is the name of Ross's pet monkey?",Marcel,Milo,Max,Martin,A
-253,Movies & TV,3,Who directed the 1997 film Titanic?,Steven Spielberg,James Cameron,Ridley Scott,Peter Jackson,B
-254,Movies & TV,4,Which actor played Neo in The Matrix?,Brad Pitt,Tom Cruise,Keanu Reeves,Will Smith,C
-257,Movies & TV,5,"In Breaking Bad, what is the street name of Jesse Pinkman's product?",Blue Sky,Red Ice,Crystal Rain,White Heat,A
-258,Movies & TV,7,Which director is known for the films Vertigo and Psycho?,Orson Welles,Billy Wilder,Alfred Hitchcock,John Ford,C
-259,Movies & TV,8,Which TV drama features the fictional advertising agency Sterling Cooper?,The Wire,Mad Men,Suits,Billions,B
-260,Movies & TV,6,"In Star Wars, what is the name of Han Solo's ship?",Star Destroyer,Millennium Falcon,Ghost,X-wing,B
-261,Technology,1,"What device is commonly used to make phone calls, send messages, and run apps?",Smartphone,Microscope,Toaster,Compass,A
-262,Technology,2,Which of these is an example of computer software?,Keyboard,Monitor,Web browser,Printer,C
-263,Technology,3,What does Wi-Fi allow devices to do?,Print without ink,Connect wirelessly to a network,Store unlimited power,Repair damaged screens,B
-264,Technology,4,Which component is often called the brain of a computer?,RAM,CPU,Hard drive,Power supply,B
-265,Technology,5,What is the main purpose of encryption?,To compress video files,To protect data from unauthorized access,To increase screen brightness,To cool computer hardware,B
-266,Technology,6,Which technology is used to verify identity with a fingerprint or face scan?,Biometrics,Bluetooth,Blockchain,Bandwidth,A
-267,Technology,7,What does cloud computing mainly provide?,Local-only file editing,Remote computing resources over the internet,Battery charging through clouds,Offline radio transmission,B
-271,Animals,1,Which animal is known for saying 'meow'?,Dog,Cat,Cow,Duck,B
-280,Animals,10,Which mammal lays eggs instead of giving birth to live young?,Platypus,Armadillo,Meerkat,Capybara,A
-282,Music,2,How many strings does a standard guitar usually have?,4,5,6,8,C
-287,Music,7,Which jazz musician was famous for playing the trumpet and singing with a raspy voice?,Miles Davis,Louis Armstrong,Duke Ellington,John Coltrane,B
-288,Music,8,"In Western music theory, how many sharps are in the key of E major?",2,3,4,5,C
-289,Music,9,"Which musical form is commonly structured as exposition, development, and recapitulation?",Sonata form,Rondo form,Theme form,Strophic form,A
-290,Music,10,Which mode is built by starting on the second degree of a major scale?,Dorian,Lydian,Mixolydian,Phrygian,A
-300,Famous people,6,Which composer is famous for the 'Fifth Symphony' and 'Moonlight Sonata'?,Johann Bach,Wolfgang Mozart,Franz Schubert,Ludwig Beethoven,D
-304,Sport,4,Which country hosted the 2016 Summer Olympics?,China,Brazil,Japan,Greece,B
-305,Sport,5,What is the maximum score possible with one dart in a standard game of darts?,50,60,75,100,B
-306,Sport,6,"In tennis, what term describes a score of zero?",Nil,Blank,Love,Duck,C
-307,Sport,7,Which cycling race is traditionally associated with the yellow jersey?,Giro d'Italia,Tour de France,Vuelta a España,Paris-Roubaix,B
-315,History of Israel,4,Which city did Israel capture from Jordan during the 1967 Six-Day War?,Haifa,Tel Aviv,East Jerusalem,Eilat,C
-316,History of Israel,5,Which Israeli leader signed the 1979 peace treaty with Egypt?,Menachem Begin,Shimon Peres,Levi Eshkol,Moshe Sharett,A
-317,History of Israel,5,Which Egyptian president signed a peace treaty with Israel in 1979?,Gamal Abdel Nasser,Anwar Sadat,Hosni Mubarak,Mohamed Naguib,B
-318,History of Israel,6,Which ancient king is traditionally associated with building the First Temple in Jerusalem?,Saul,David,Solomon,Hezekiah,C
-319,History of Israel,7,Which empire destroyed the First Temple in 586 BCE?,Assyrian Empire,Babylonian Empire,Persian Empire,Roman Empire,B
-320,History of Israel,8,Which agreement in the 1990s created the Palestinian Authority?,Camp David Accords,Oslo Accords,Wye River Memorandum,Madrid Conference,B
-324,History of the world,2,Which empire was ruled by Genghis Khan?,Mongol Empire,Ottoman Empire,Persian Empire,Byzantine Empire,A
-328,History of the world,4,Which city was the capital of the Byzantine Empire?,Athens,Rome,Constantinople,Alexandria,C
-329,History of the world,6,Which Chinese dynasty was known for building much of the Great Wall in its famous form?,Han,Tang,Ming,Qing,C
-340,Geography,10,"Which sea is bordered by Kazakhstan, Turkmenistan, Iran, Azerbaijan, and Russia?",Black Sea,Caspian Sea,Aral Sea,Red Sea,B
-347,Science,7,Which type of electromagnetic radiation has the shortest wavelength?,Radio waves,Microwaves,Visible light,Gamma rays,D
-348,Science,8,What process forms mRNA from a DNA template?,Translation,Transcription,Replication,Mutation,B
-349,Science,9,Which law states that pressure and volume of a gas are inversely related at constant temperature?,Boyle's law,Charles's law,Ohm's law,Newton's law,A
-350,Science,10,Which particle mediates the electromagnetic force in quantum field theory?,Gluon,Photon,Neutrino,Graviton,B
-353,Sport,2,Which sport is played in the Super Bowl?,Baseball,American football,Ice hockey,Basketball,B
-358,Sport,6,Which Grand Slam tennis tournament is played on grass courts?,US Open,Wimbledon,French Open,Australian Open,B
-359,Sport,7,"In cricket, what does LBW stand for?",Leg Before Wicket,Long Ball Wide,Last Batting Win,Left Bat Wicket,A
-360,Sport,8,Which athlete is nicknamed 'The Lightning Bolt'?,Michael Phelps,Mo Farah,Usain Bolt,Carl Lewis,C
-364,History of Israel,3,Which city was declared Israel's capital in 1949?,Tel Aviv,Haifa,Beersheba,Jerusalem,D
-367,History of Israel,5,Who was prime minister of Israel during the Yom Kippur War?,Levi Eshkol,Moshe Sharett,Golda Meir,Shimon Peres,C
-377,History of the world,4,Which trade route connected China with the Mediterranean world?,Silk Road,Amber Road,Spice Trail,Royal Road,A
-378,History of the world,7,Who was the leader of the Soviet Union during World War II?,Lenin,Stalin,Trotsky,Khrushchev,B
-379,History of the world,6,Which civilization developed the concept of zero as a number in mathematics?,Maya,Indian,Greek,Roman,B
-385,Geography,5,The Strait of Gibraltar separates Spain from which country?,Morocco,Algeria,Tunisia,Portugal,A
-386,Geography,6,Which mountain range forms a natural border between France and Spain?,Alps,Pyrenees,Carpathians,Apennines,B
-387,Geography,7,"Which sea is bordered by Jordan, Israel, and the West Bank?",Red Sea,Caspian Sea,Dead Sea,Black Sea,C
-388,Geography,8,Which island is the largest in the Mediterranean Sea?,Cyprus,Sardinia,Crete,Sicily,D
-389,Geography,9,Which country contains the geographic region known as the Atacama Desert?,Chile,Peru,Argentina,Bolivia,A
-397,Science,7,Which organ in the human body filters blood to remove waste?,Liver,Lung,Kidney,Heart,C
-398,Science,8,What is the process called when a liquid changes into a gas?,Condensation,Freezing,Melting,Evaporation,D
-400,Science,10,What is the main function of hemoglobin in red blood cells?,Carry oxygen,Fight germs,Digest food,Store calcium,A
-404,Movies & TV,4,Which actor played Iron Man in the Marvel Cinematic Universe?,Chris Evans,Mark Ruffalo,Chris Hemsworth,Robert Downey Jr.,D
-405,Movies & TV,3,What is the name of the wizarding school in the Harry Potter films?,Hogwarts,Durmstrang,Beauxbatons,Ilvermorny,A
-410,Movies & TV,6,What is the name of the coffee shop in Friends?,Monk's Cafe,Central Perk,Luke's Diner,Cafe Nervosa,B
-413,Sport,3,Which sport is played at Wimbledon?,Golf,Tennis,Cricket,Rugby,B
-419,Sport,9,"In baseball, how many outs are there in a half-inning?",2,3,4,5,B
-420,Sport,10,Which Grand Slam tennis tournament is played on clay courts?,US Open,Wimbledon,French Open,Australian Open,C
-425,History of Israel,5,Which Israeli leader signed the Camp David Accords with Egypt in 1978?,Yitzhak Rabin,Shimon Peres,Menachem Begin,Levi Eshkol,C
-427,History of Israel,6,Which event triggered the Yom Kippur War in 1973?,An attack by Egypt and Syria,A British withdrawal from Palestine,A revolt against Ottoman rule,A peace treaty with Jordan,A
-428,History of Israel,6,Which ancient kingdom was ruled by King David according to biblical tradition?,Kingdom of Moab,Kingdom of Judah,United Kingdom of Israel,Kingdom of Edom,C
-430,History of Israel,8,Which Israeli operation in 1981 destroyed Iraq's Osirak nuclear reactor?,Operation Entebbe,Operation Opera,Operation Litani,Operation Moses,B
+101,Sport,3,"In basketball, how many points is a free throw worth?",1,2,3,4,A
+102,Sport,5,"In tennis scoring, what comes after 30?",35,40,45,50,B
+103,Sport,6,What is the maximum score in a single frame of ten-pin bowling?,20,25,30,40,C
+104,Sport,7,Which athlete is known for winning eight gold medals at the 2008 Olympics?,Usain Bolt,Carl Lewis,Mark Spitz,Michael Phelps,D
+105,Sport,8,"In cricket, what is the term for a bowler taking three wickets with three consecutive deliveries?",Hat-trick,Powerplay,Follow-on,Maiden,A
+106,History of Israel,3,Which ancient king is traditionally associated with making Jerusalem the capital of a united Israelite kingdom?,Saul,David,Solomon,Hezekiah,B
+107,History of Israel,4,Who became Israel's first female prime minister in 1969?,Tzipi Livni,Golda Meir,Dalia Itzik,Leah Rabin,B
+108,History of Israel,5,Which Israeli prime minister was assassinated in 1995?,Yitzhak Rabin,Shimon Peres,Ariel Sharon,Ehud Barak,A
+109,History of Israel,7,Which empire controlled the region before the British Mandate began after World War I?,Roman Empire,Ottoman Empire,Byzantine Empire,Persian Empire,B
+110,History of the world,3,The Magna Carta was signed in which country?,France,Spain,England,Italy,C
+111,History of the world,5,What year did Christopher Columbus first reach the Americas?,1492,1517,1607,1776,A
+112,History of the world,6,The Treaty of Versailles officially ended which major conflict?,World War II,Napoleonic Wars,World War I,Crimean War,C
+113,History of the world,7,Which Chinese dynasty is known for beginning construction of the Great Wall's earliest major sections?,Qin,Tang,Song,Ming,A
+114,History of the world,8,The Meiji Restoration began in which year?,1848,1868,1889,1905,B
+115,History of the world,9,Which battle in 732 is often linked to halting Umayyad expansion into Western Europe?,Battle of Hastings,Battle of Tours,Battle of Lepanto,Battle of Vienna,B
+116,History of the world,10,The Peace of Westphalia in 1648 ended which European war?,Seven Years' War,War of Spanish Succession,Thirty Years' War,Hundred Years' War,C
+117,Geography,4,Which country is home to the city of Marrakech?,Algeria,Tunisia,Egypt,Morocco,D
+118,Geography,5,Which mountain range separates Europe from Asia?,Urals,Alps,Andes,Atlas,A
+119,Geography,6,Which sea lies between Italy and the Balkan Peninsula?,Baltic Sea,Adriatic Sea,Black Sea,Aegean Sea,B
+120,Geography,7,Which country has the most natural lakes in the world?,Russia,Brazil,Finland,Canada,D
+121,Geography,8,The Strait of Malacca lies between the Malay Peninsula and which island?,Sumatra,Borneo,Java,Luzon,A
+122,Geography,6,Which African country is completely surrounded by South Africa?,Eswatini,Lesotho,Botswana,Namibia,B
+123,Science,4,What is the chemical symbol for gold?,Ag,Au,Gd,Go,B
+124,Science,6,What type of energy is stored in the bonds of molecules?,Thermal energy,Chemical energy,Kinetic energy,Sound energy,B
+125,Science,7,Which process turns a liquid into a gas below its boiling point?,Condensation,Freezing,Evaporation,Deposition,C
+126,Science,10,"In DNA, which base pairs with adenine?",Cytosine,Guanine,Thymine,Uracil,C
+127,Movies & TV,1,Which animated film features a snowman named Olaf?,Frozen,Moana,Tangled,Brave,A
+128,Movies & TV,3,Who directed the 1993 film Jurassic Park?,James Cameron,George Lucas,Steven Spielberg,Tim Burton,C
+129,Movies & TV,5,"In Breaking Bad, what subject does Walter White teach?",Physics,Biology,Chemistry,Math,C
+130,Movies & TV,4,What is the name of the fictional continent in Game of Thrones where King's Landing is located?,Essos,Westeros,Narnia,Middle-earth,B
+131,Movies & TV,3,"Which movie features the line, 'There's no place like home'?",The Wizard of Oz,Casablanca,Mary Poppins,Singin' in the Rain,A
+132,Movies & TV,7,Which actress played Clarice Starling in The Silence of the Lambs?,Jodie Foster,Meryl Streep,Glenn Close,Susan Sarandon,A
+133,Movies & TV,5,"In The Office, what is the name of the company where the main characters work?",Initech,Dunder Mifflin,Sterling Cooper,Pawnee Paper,B
+134,Technology,2,Which device is commonly used to store files externally?,Monitor,USB flash drive,Keyboard,Router,B
+135,Technology,5,What does HTTPS help provide when browsing websites?,Faster screen brightness,Encrypted communication,More storage space,Better battery life,B
+136,Technology,6,Which component temporarily stores data that a computer is actively using?,RAM,SSD,GPU,ROM,A
+137,Technology,6,"In networking, what does an IP address identify?",A file type,A networked device,A battery level,A screen size,B
+138,Technology,8,What is machine learning primarily concerned with?,Teaching machines to learn from data,Repairing mechanical engines,Increasing monitor resolution,Replacing all computer hardware,A
+139,Technology,9,Which concept is central to blockchain technology?,Central file deletion,Decentralized ledgers,Analog signal tuning,Single-user editing,B
+140,Animals,2,Which animal is the largest mammal on Earth?,African elephant,Blue whale,Hippopotamus,Polar bear,B
+141,Animals,4,What type of animal is a Komodo dragon?,Snake,Lizard,Crocodile,Turtle,B
+142,Animals,9,Which insect is known for producing honey?,Ant,Beetle,Honeybee,Dragonfly,C
+143,Music,2,Which symbol is used to indicate a sharp note in music notation?,#,b,@,&,A
+144,Music,2,Which family of instruments does the cello belong to?,Brass,String,Woodwind,Percussion,B
+145,Music,3,Who composed the famous symphony known as the 'Fifth Symphony'?,Mozart,Bach,Beethoven,Chopin,C
+146,Music,3,What is the term for the speed of a piece of music?,Tempo,Pitch,Harmony,Timbre,A
+147,Music,5,What is the interval between C and G called?,Third,Fourth,Fifth,Sixth,C
+148,Music,6,Which composer wrote 'The Four Seasons'?,Vivaldi,Handel,Haydn,Schubert,A
+149,Music,7,"In Western music theory, how many semitones are in an octave?",8,10,12,14,C
+150,Famous people,1,Who was the first president of the United States?,George Washington,Abraham Lincoln,Thomas Jefferson,John Adams,A
+151,Famous people,3,Which famous leader gave the 'I Have a Dream' speech?,Nelson Mandela,Malcolm X,Barack Obama,Martin Luther King Jr.,D
+152,Famous people,4,Which athlete is often called 'The Greatest' in boxing?,Mike Tyson,Muhammad Ali,Floyd Mayweather,Joe Frazier,B
+153,Famous people,5,Which musician was known as the 'King of Pop'?,Prince,Elvis Presley,Freddie Mercury,Michael Jackson,D
+154,Famous people,6,Which explorer is credited with leading the first expedition to circumnavigate the globe?,Christopher Columbus,Ferdinand Magellan,James Cook,Marco Polo,B
+155,Sport,3,Which sport is associated with the term 'slam dunk'?,Basketball,Volleyball,Baseball,Hockey,A
+156,Sport,4,How many rings are on the Olympic flag?,4,5,6,7,B
+157,Sport,6,Which country won the 2018 FIFA World Cup?,Brazil,Germany,France,Argentina,C
+158,Sport,3,"In golf, what is a score of one under par on a hole called?",Bogey,Birdie,Eagle,Par,B
+159,Sport,7,"In Formula 1, what color flag signals drivers to stop the race immediately?",Yellow,Blue,Red,Green,C
+160,History of Israel,5,Who was the first president of Israel?,Levi Eshkol,Chaim Weizmann,Yitzhak Rabin,Moshe Sharett,B
+161,History of Israel,7,Which Israeli prime minister signed the 1993 Oslo Accords with the Palestine Liberation Organization?,Yitzhak Rabin,Shimon Peres,Ariel Sharon,Ehud Barak,A
+162,History of Israel,6,What was the primary purpose of Operation Magic Carpet in 1949 and 1950?,Airlifting Jews from Yemen,Defending the Galilee,Capturing the Sinai,Building new ports,A
+163,History of Israel,8,Which empire destroyed the Second Temple in Jerusalem in 70 CE?,Babylonian Empire,Persian Empire,Roman Empire,Ottoman Empire,C
+164,History of the world,2,In which year did World War II end?,1918,1939,1945,1950,C
+165,History of the world,4,Which explorer led the first expedition to circumnavigate the globe?,Vasco da Gama,Ferdinand Magellan,James Cook,Henry Hudson,B
+166,History of the world,6,Which dynasty founded by Kublai Khan ruled China from 1271 to 1368?,Tang,Ming,Qing,Yuan,D
+167,History of the world,7,The Berlin Conference of 1884 to 1885 focused mainly on which issue?,Partition of Africa,Unification of Italy,Balkan alliances,Pacific trade routes,A
+168,History of the world,8,Which ancient ruler is linked to one of the earliest known law codes?,Ashoka,Hammurabi,Darius I,Pericles,B
+169,Geography,1,What is the largest ocean on Earth?,Atlantic Ocean,Indian Ocean,Pacific Ocean,Arctic Ocean,C
+170,Geography,2,Which continent is the Sahara Desert located in?,Asia,Africa,Australia,Europe,B
+171,Geography,3,Which river is the longest in the world?,Nile River,Amazon River,Yangtze River,Mississippi River,A
+172,Geography,5,"Which country has the most time zones, including overseas territories?",Russia,France,United States,Australia,B
+173,Geography,8,Which lake is the deepest freshwater lake in the world?,Lake Superior,Lake Tanganyika,Lake Baikal,Lake Victoria,C
+174,Geography,9,The Strait of Hormuz connects the Persian Gulf to which body of water?,Red Sea,Arabian Sea,Gulf of Oman,Caspian Sea,C
+175,Geography,10,Which country is home to the geographic point known as the Pole of Inaccessibility in Eurasia?,China,Kazakhstan,Mongolia,Russia,A
+176,Science,6,What type of energy is stored in food?,Chemical energy,Sound energy,Light energy,Kinetic energy,A
+177,Science,7,Which blood type is commonly called the universal donor?,AB positive,A negative,O negative,B positive,C
+178,Science,8,What is the SI unit of electric current?,Volt,Watt,Ohm,Ampere,D
+179,Science,9,Which process splits atomic nuclei to release energy?,Fusion,Fission,Condensation,Sublimation,B
+180,Science,10,Which particle has no electric charge and is found in the atomic nucleus?,Proton,Electron,Neutron,Photon,C
+181,Movies & TV,2,"In the TV series Friends, what is the name of Ross's pet monkey?",Marcel,Milo,Max,Martin,A
+182,Movies & TV,3,Who directed the 1997 film Titanic?,Steven Spielberg,James Cameron,Ridley Scott,Peter Jackson,B
+183,Movies & TV,4,Which actor played Neo in The Matrix?,Brad Pitt,Tom Cruise,Keanu Reeves,Will Smith,C
+184,Movies & TV,5,"In Breaking Bad, what is the street name of Jesse Pinkman's product?",Blue Sky,Red Ice,Crystal Rain,White Heat,A
+185,Movies & TV,7,Which director is known for the films Vertigo and Psycho?,Orson Welles,Billy Wilder,Alfred Hitchcock,John Ford,C
+186,Movies & TV,8,Which TV drama features the fictional advertising agency Sterling Cooper?,The Wire,Mad Men,Suits,Billions,B
+187,Movies & TV,6,"In Star Wars, what is the name of Han Solo's ship?",Star Destroyer,Millennium Falcon,Ghost,X-wing,B
+188,Technology,1,"What device is commonly used to make phone calls, send messages, and run apps?",Smartphone,Microscope,Toaster,Compass,A
+189,Technology,2,Which of these is an example of computer software?,Keyboard,Monitor,Web browser,Printer,C
+190,Technology,3,What does Wi-Fi allow devices to do?,Print without ink,Connect wirelessly to a network,Store unlimited power,Repair damaged screens,B
+191,Technology,4,Which component is often called the brain of a computer?,RAM,CPU,Hard drive,Power supply,B
+192,Technology,5,What is the main purpose of encryption?,To compress video files,To protect data from unauthorized access,To increase screen brightness,To cool computer hardware,B
+193,Technology,6,Which technology is used to verify identity with a fingerprint or face scan?,Biometrics,Bluetooth,Blockchain,Bandwidth,A
+194,Technology,7,What does cloud computing mainly provide?,Local-only file editing,Remote computing resources over the internet,Battery charging through clouds,Offline radio transmission,B
+195,Animals,1,Which animal is known for saying 'meow'?,Dog,Cat,Cow,Duck,B
+196,Animals,10,Which mammal lays eggs instead of giving birth to live young?,Platypus,Armadillo,Meerkat,Capybara,A
+197,Music,2,How many strings does a standard guitar usually have?,4,5,6,8,C
+198,Music,7,Which jazz musician was famous for playing the trumpet and singing with a raspy voice?,Miles Davis,Louis Armstrong,Duke Ellington,John Coltrane,B
+199,Music,8,"In Western music theory, how many sharps are in the key of E major?",2,3,4,5,C
+200,Music,9,"Which musical form is commonly structured as exposition, development, and recapitulation?",Sonata form,Rondo form,Theme form,Strophic form,A
+201,Music,10,Which mode is built by starting on the second degree of a major scale?,Dorian,Lydian,Mixolydian,Phrygian,A
+202,Famous people,6,Which composer is famous for the 'Fifth Symphony' and 'Moonlight Sonata'?,Johann Bach,Wolfgang Mozart,Franz Schubert,Ludwig Beethoven,D
+203,Sport,4,Which country hosted the 2016 Summer Olympics?,China,Brazil,Japan,Greece,B
+204,Sport,5,What is the maximum score possible with one dart in a standard game of darts?,50,60,75,100,B
+205,Sport,6,"In tennis, what term describes a score of zero?",Nil,Blank,Love,Duck,C
+206,Sport,7,Which cycling race is traditionally associated with the yellow jersey?,Giro d'Italia,Tour de France,Vuelta a España,Paris-Roubaix,B
+207,History of Israel,4,Which city did Israel capture from Jordan during the 1967 Six-Day War?,Haifa,Tel Aviv,East Jerusalem,Eilat,C
+208,History of Israel,5,Which Israeli leader signed the 1979 peace treaty with Egypt?,Menachem Begin,Shimon Peres,Levi Eshkol,Moshe Sharett,A
+209,History of Israel,5,Which Egyptian president signed a peace treaty with Israel in 1979?,Gamal Abdel Nasser,Anwar Sadat,Hosni Mubarak,Mohamed Naguib,B
+210,History of Israel,6,Which ancient king is traditionally associated with building the First Temple in Jerusalem?,Saul,David,Solomon,Hezekiah,C
+211,History of Israel,7,Which empire destroyed the First Temple in 586 BCE?,Assyrian Empire,Babylonian Empire,Persian Empire,Roman Empire,B
+212,History of Israel,8,Which agreement in the 1990s created the Palestinian Authority?,Camp David Accords,Oslo Accords,Wye River Memorandum,Madrid Conference,B
+213,History of the world,2,Which empire was ruled by Genghis Khan?,Mongol Empire,Ottoman Empire,Persian Empire,Byzantine Empire,A
+214,History of the world,4,Which city was the capital of the Byzantine Empire?,Athens,Rome,Constantinople,Alexandria,C
+215,History of the world,6,Which Chinese dynasty was known for building much of the Great Wall in its famous form?,Han,Tang,Ming,Qing,C
+216,Geography,10,"Which sea is bordered by Kazakhstan, Turkmenistan, Iran, Azerbaijan, and Russia?",Black Sea,Caspian Sea,Aral Sea,Red Sea,B
+217,Science,7,Which type of electromagnetic radiation has the shortest wavelength?,Radio waves,Microwaves,Visible light,Gamma rays,D
+218,Science,8,What process forms mRNA from a DNA template?,Translation,Transcription,Replication,Mutation,B
+219,Science,9,Which law states that pressure and volume of a gas are inversely related at constant temperature?,Boyle's law,Charles's law,Ohm's law,Newton's law,A
+220,Science,10,Which particle mediates the electromagnetic force in quantum field theory?,Gluon,Photon,Neutrino,Graviton,B
+221,Sport,2,Which sport is played in the Super Bowl?,Baseball,American football,Ice hockey,Basketball,B
+222,Sport,6,Which Grand Slam tennis tournament is played on grass courts?,US Open,Wimbledon,French Open,Australian Open,B
+223,Sport,7,"In cricket, what does LBW stand for?",Leg Before Wicket,Long Ball Wide,Last Batting Win,Left Bat Wicket,A
+224,Sport,8,Which athlete is nicknamed 'The Lightning Bolt'?,Michael Phelps,Mo Farah,Usain Bolt,Carl Lewis,C
+225,History of Israel,3,Which city was declared Israel's capital in 1949?,Tel Aviv,Haifa,Beersheba,Jerusalem,D
+226,History of Israel,5,Who was prime minister of Israel during the Yom Kippur War?,Levi Eshkol,Moshe Sharett,Golda Meir,Shimon Peres,C
+227,History of the world,4,Which trade route connected China with the Mediterranean world?,Silk Road,Amber Road,Spice Trail,Royal Road,A
+228,History of the world,7,Who was the leader of the Soviet Union during World War II?,Lenin,Stalin,Trotsky,Khrushchev,B
+229,History of the world,6,Which civilization developed the concept of zero as a number in mathematics?,Maya,Indian,Greek,Roman,B
+230,Geography,5,The Strait of Gibraltar separates Spain from which country?,Morocco,Algeria,Tunisia,Portugal,A
+231,Geography,6,Which mountain range forms a natural border between France and Spain?,Alps,Pyrenees,Carpathians,Apennines,B
+232,Geography,7,"Which sea is bordered by Jordan, Israel, and the West Bank?",Red Sea,Caspian Sea,Dead Sea,Black Sea,C
+233,Geography,8,Which island is the largest in the Mediterranean Sea?,Cyprus,Sardinia,Crete,Sicily,D
+234,Geography,9,Which country contains the geographic region known as the Atacama Desert?,Chile,Peru,Argentina,Bolivia,A
+235,Science,7,Which organ in the human body filters blood to remove waste?,Liver,Lung,Kidney,Heart,C
+236,Science,8,What is the process called when a liquid changes into a gas?,Condensation,Freezing,Melting,Evaporation,D
+237,Science,10,What is the main function of hemoglobin in red blood cells?,Carry oxygen,Fight germs,Digest food,Store calcium,A
+238,Movies & TV,4,Which actor played Iron Man in the Marvel Cinematic Universe?,Chris Evans,Mark Ruffalo,Chris Hemsworth,Robert Downey Jr.,D
+239,Movies & TV,3,What is the name of the wizarding school in the Harry Potter films?,Hogwarts,Durmstrang,Beauxbatons,Ilvermorny,A
+240,Movies & TV,6,What is the name of the coffee shop in Friends?,Monk's Cafe,Central Perk,Luke's Diner,Cafe Nervosa,B
+241,Sport,3,Which sport is played at Wimbledon?,Golf,Tennis,Cricket,Rugby,B
+242,Sport,9,"In baseball, how many outs are there in a half-inning?",2,3,4,5,B
+243,Sport,10,Which Grand Slam tennis tournament is played on clay courts?,US Open,Wimbledon,French Open,Australian Open,C
+244,History of Israel,5,Which Israeli leader signed the Camp David Accords with Egypt in 1978?,Yitzhak Rabin,Shimon Peres,Menachem Begin,Levi Eshkol,C
+245,History of Israel,6,Which event triggered the Yom Kippur War in 1973?,An attack by Egypt and Syria,A British withdrawal from Palestine,A revolt against Ottoman rule,A peace treaty with Jordan,A
+246,History of Israel,6,Which ancient kingdom was ruled by King David according to biblical tradition?,Kingdom of Moab,Kingdom of Judah,United Kingdom of Israel,Kingdom of Edom,C
+247,History of Israel,8,Which Israeli operation in 1981 destroyed Iraq's Osirak nuclear reactor?,Operation Entebbe,Operation Opera,Operation Litani,Operation Moses,B

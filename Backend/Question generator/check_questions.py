@@ -170,6 +170,9 @@ def delete_question(
         if question.get("id") not in ids_to_delete_set
     ]
 
+    for question_id, question in enumerate(rows_to_keep, start=1):
+        question["id"] = question_id
+
     with Path(csv_file_name).open("w", newline="", encoding="utf-8") as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()

@@ -38,9 +38,9 @@ def convert_csv_to_sqlite():
 
         with CSV_PATH.open("r", newline="", encoding="utf-8") as csv_file:
             reader = csv.DictReader(csv_file)
-            for row in reader:
+            for question_id, row in enumerate(reader, start=1):
                 cursor.execute(INSERT_SQL, (
-                    int(row["id"]),
+                    question_id,
                     row["topic"],
                     int(row["difficulty"]),
                     row["question"],

@@ -129,6 +129,9 @@ def delete_question(ids_to_delete: list[int], csv_file_name: str | Path = QUESTI
     if not fieldnames:
         raise ValueError(f"{csv_file_name} does not contain a CSV header.")
 
+    for question_id, row in enumerate(rows_to_keep, start=1):
+        row["id"] = question_id
+
     with csv_path.open("w", newline="", encoding="utf-8") as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
