@@ -99,6 +99,14 @@ def get_ids_to_delete(llm_output: dict) -> list[int]:
     return ids_to_delete
 
 
+def print_deleted_questions(ids_to_delete: list[int], questions: list[dict]) -> None:
+    ids_to_delete_set = set(ids_to_delete)
+
+    for question in questions:
+        if question["id"] in ids_to_delete_set:
+            print(f'Deleted question {question["id"]}: {question["question"]}')
+
+
 def delete_question(ids_to_delete: list[int], csv_file_name: str = QUESTIONS_FILE) -> None:
     if not ids_to_delete:
         return
@@ -110,12 +118,9 @@ def delete_question(ids_to_delete: list[int], csv_file_name: str = QUESTIONS_FIL
         reader = csv.DictReader(csv_file)
         fieldnames = reader.fieldnames
         rows_to_keep = []
-        deleted_rows = []
 
         for row in reader:
-            if row.get("id") in ids_to_delete_set:
-                deleted_rows.append(row)
-            else:
+            if row.get("id") not in ids_to_delete_set:
                 rows_to_keep.append(row)
 
     if not fieldnames:
@@ -125,9 +130,6 @@ def delete_question(ids_to_delete: list[int], csv_file_name: str = QUESTIONS_FIL
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows_to_keep)
-
-    for row in deleted_rows:
-        print(f'Deleted question {row.get("id")}: {row.get("question")}')
 
 
 def delete_repetitive_questions() -> None:
@@ -154,7 +156,9 @@ def delete_repetitive_questions() -> None:
             questions=questions,
             max_retries=MAX_RETRIES,
         )
-        all_ids_to_delete.extend(get_ids_to_delete(llm_output))
+        topic_ids_to_delete = get_ids_to_delete(llm_output)
+        print_deleted_questions(topic_ids_to_delete, questions)
+        all_ids_to_delete.extend(topic_ids_to_delete)
 
     unique_ids_to_delete = sorted(set(all_ids_to_delete))
     delete_question(unique_ids_to_delete)
