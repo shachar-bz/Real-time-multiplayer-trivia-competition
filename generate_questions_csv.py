@@ -11,7 +11,7 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 NUM_OF_QUESTIONS = 10
 QUESTIONS_GENERATION_MODEL = "gpt-5.5"
-TOTAL_QUESTIONS = 300
+TOTAL_QUESTIONS = 350
 OUTPUT_FILE = "questions.csv"
 MAX_RETRIES = 2
 
@@ -132,44 +132,67 @@ def validate_question(raw_question: dict, topic: str, question_id: int) -> dict:
     }
 
 
+def get_next_question_id(output_path: Path) -> int:
+    if not output_path.exists():
+        return 1
+
+    with output_path.open("r", newline="", encoding="utf-8") as csv_file:
+        reader = csv.DictReader(csv_file)
+        existing_ids = [
+            int(row["id"])
+            for row in reader
+            if row.get("id") and row["id"].isdigit()
+        ]
+
+    if not existing_ids:
+        return 1
+    return max(existing_ids) + 1
+
+
 def generate_questions(
     client: OpenAI,
     model: str,
     total_questions: int,
     num_of_questions: int,
     max_retries: int,
-) -> list[dict]:
-    rows = []
+) -> None:
+    output_path = Path(OUTPUT_FILE)
+    file_exists = output_path.exists()
+    next_question_id = get_next_question_id(output_path)
+    generated_count = 0
     topic_index = 0
 
-    while len(rows) < total_questions:
-        topic = TOPICS[topic_index % len(TOPICS)]
-        remaining = total_questions - len(rows)
-        batch_size = min(num_of_questions, remaining)
-        print(f"Generating {batch_size} questions for {topic}...")
-
-        data = call_openai(client, model, topic, batch_size, max_retries)
-        batch = data.get("questions", [])
-
-        if len(batch) != batch_size:
-            raise ValueError(
-                f"Expected {batch_size} questions for {topic}, got {len(batch)}."
-            )
-
-        for raw_question in batch:
-            row = validate_question(raw_question, topic, len(rows) + 1)
-            rows.append(row)
-
-        topic_index += 1
-
-    return rows
-
-
-def write_csv(rows: list[dict], output_path: Path) -> None:
-    with output_path.open("w", newline="", encoding="utf-8") as csv_file:
+    with output_path.open("a", newline="", encoding="utf-8") as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=CSV_FIELDS)
-        writer.writeheader()
-        writer.writerows(rows)
+        if not file_exists:
+            writer.writeheader()
+
+        while generated_count < total_questions:
+            topic = TOPICS[topic_index % len(TOPICS)]
+            remaining = total_questions - generated_count
+            batch_size = min(num_of_questions, remaining)
+            print(f"Generating {batch_size} questions for {topic}...")
+
+            data = call_openai(client, model, topic, batch_size, max_retries)
+            batch = data.get("questions", [])
+
+            if len(batch) != batch_size:
+                raise ValueError(
+                    f"Expected {batch_size} questions for {topic}, got {len(batch)}."
+                )
+
+            rows = []
+            for raw_question in batch:
+                row = validate_question(raw_question, topic, next_question_id)
+                rows.append(row)
+                next_question_id += 1
+                generated_count += 1
+
+            writer.writerows(rows)
+            csv_file.flush()
+            print(f"Stored {generated_count} questions in {OUTPUT_FILE}")
+
+            topic_index += 1
 
 
 def main() -> None:
@@ -181,15 +204,14 @@ def main() -> None:
         raise RuntimeError("Missing OPENAI_API_KEY in .env file.")
 
     client = OpenAI(api_key=OPENAI_API_KEY)
-    rows = generate_questions(
+    generate_questions(
         client=client,
         model=QUESTIONS_GENERATION_MODEL,
         total_questions=TOTAL_QUESTIONS,
         num_of_questions=NUM_OF_QUESTIONS,
         max_retries=MAX_RETRIES,
     )
-    write_csv(rows, Path(OUTPUT_FILE))
-    print(f"Wrote {len(rows)} questions to {OUTPUT_FILE}")
+    print(f"Wrote {TOTAL_QUESTIONS} questions to {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":
