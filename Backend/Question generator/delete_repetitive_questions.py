@@ -7,10 +7,13 @@ from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
 
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parent
+BACKEND_DIR = BASE_DIR.parent
+
+load_dotenv(BACKEND_DIR / ".env")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 REPETITIVE_RECOGNIZER_MODEL = "gpt-5.4"
-QUESTIONS_FILE = "questions.csv"
+QUESTIONS_FILE = BASE_DIR / "questions.csv"
 MAX_RETRIES = 2
 
 DEDUPE_PROMPT = """YOU are an expert data analyst specializing in semantic deduplication. You will be provided with a list of trivia questions from a single topic, where each entry is a pair consisting of a unique id and the question text.
@@ -107,7 +110,7 @@ def print_deleted_questions(ids_to_delete: list[int], questions: list[dict]) -> 
             print(f'Deleted question {question["id"]}: {question["question"]}')
 
 
-def delete_question(ids_to_delete: list[int], csv_file_name: str = QUESTIONS_FILE) -> None:
+def delete_question(ids_to_delete: list[int], csv_file_name: str | Path = QUESTIONS_FILE) -> None:
     if not ids_to_delete:
         return
 
@@ -136,7 +139,7 @@ def delete_repetitive_questions() -> None:
     if not OPENAI_API_KEY:
         raise RuntimeError("Missing OPENAI_API_KEY in .env file.")
 
-    csv_path = Path(QUESTIONS_FILE)
+    csv_path = QUESTIONS_FILE
     if not csv_path.exists():
         raise FileNotFoundError(f"Could not find {QUESTIONS_FILE}.")
 

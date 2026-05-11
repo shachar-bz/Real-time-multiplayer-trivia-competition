@@ -7,12 +7,15 @@ from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
 
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parent
+BACKEND_DIR = BASE_DIR.parent
+
+load_dotenv(BACKEND_DIR / ".env")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 NUM_OF_QUESTIONS = 10
 QUESTIONS_GENERATION_MODEL = "gpt-5.5"
 TOTAL_QUESTIONS = 20
-OUTPUT_FILE = "questions.csv"
+OUTPUT_FILE = BASE_DIR / "questions.csv"
 MAX_RETRIES = 2
 
 TOPICS = [

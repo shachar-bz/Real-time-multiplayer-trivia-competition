@@ -7,10 +7,13 @@ from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
 
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parent
+BACKEND_DIR = BASE_DIR.parent
+
+load_dotenv(BACKEND_DIR / ".env")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-QUESTIONS_FILE = "questions.csv"
+QUESTIONS_FILE = BASE_DIR / "questions.csv"
 QUESTIONS_PER_CALL = 8
 MAX_RETRIES = 2
 
@@ -155,7 +158,7 @@ def delete_question(
     ids_to_delete: list[int],
     fieldnames: list[str],
     questions: list[dict],
-    csv_file_name: str = QUESTIONS_FILE,
+    csv_file_name: str | Path = QUESTIONS_FILE,
 ) -> None:
     if not ids_to_delete:
         return
@@ -177,7 +180,7 @@ def check_questions() -> None:
     if not OPENROUTER_API_KEY:
         raise RuntimeError("Missing OPENROUTER_API_KEY in .env file.")
 
-    csv_path = Path(QUESTIONS_FILE)
+    csv_path = QUESTIONS_FILE
     if not csv_path.exists():
         raise FileNotFoundError(f"Could not find {QUESTIONS_FILE}.")
 

@@ -1,11 +1,11 @@
 import csv
-import os
 import sqlite3
 from pathlib import Path
 
 # Paths
-CSV_PATH = Path("Question generator") / "questions.csv"
-DB_PATH = Path("trivia.db")
+BASE_DIR = Path(__file__).resolve().parent
+CSV_PATH = BASE_DIR / "Question generator" / "questions.csv"
+DB_PATH = BASE_DIR / "trivia.db"
 
 # Table schema
 CREATE_TABLE_SQL = """
@@ -31,32 +31,25 @@ def convert_csv_to_sqlite():
     if not CSV_PATH.exists():
         raise FileNotFoundError(f"CSV file not found at {CSV_PATH}")
 
-    # Connect to SQLite database
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("DROP TABLE IF EXISTS questions")
+        cursor.execute(CREATE_TABLE_SQL)
 
-    # Create table
-    cursor.execute(CREATE_TABLE_SQL)
-
-    # Read CSV and insert data
-    with open(CSV_PATH, "r", newline="", encoding="utf-8") as csv_file:
-        reader = csv.DictReader(csv_file)
-        for row in reader:
-            cursor.execute(INSERT_SQL, (
-                int(row["id"]),
-                row["topic"],
-                int(row["difficulty"]),
-                row["question"],
-                row["option_a"],
-                row["option_b"],
-                row["option_c"],
-                row["option_d"],
-                row["correct_option"]
-            ))
-
-    # Commit and close
-    conn.commit()
-    conn.close()
+        with CSV_PATH.open("r", newline="", encoding="utf-8") as csv_file:
+            reader = csv.DictReader(csv_file)
+            for row in reader:
+                cursor.execute(INSERT_SQL, (
+                    int(row["id"]),
+                    row["topic"],
+                    int(row["difficulty"]),
+                    row["question"],
+                    row["option_a"],
+                    row["option_b"],
+                    row["option_c"],
+                    row["option_d"],
+                    row["correct_option"]
+                ))
 
     print(f"Successfully converted {CSV_PATH} to {DB_PATH}")
 
