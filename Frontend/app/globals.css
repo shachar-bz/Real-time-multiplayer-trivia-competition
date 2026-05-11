@@ -1,0 +1,280 @@
+:root {
+  color-scheme: light;
+  --background: #eef2f6;
+  --surface: #ffffff;
+  --ink: #15202b;
+  --muted: #607086;
+  --line: #d8e0ea;
+  --primary: #146c94;
+  --primary-dark: #0d4f6e;
+  --success: #127a4a;
+  --danger: #b3261e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  background: var(--primary);
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 700;
+  min-height: 44px;
+  padding: 0 18px;
+}
+
+button:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.78;
+}
+
+.shell {
+  margin: 0 auto;
+  max-width: 920px;
+  min-height: 100vh;
+  padding: 32px 20px;
+}
+
+.topbar {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.topbar h1,
+.panel h2 {
+  margin: 0;
+}
+
+.eyebrow,
+.topic {
+  color: var(--primary-dark);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+.status {
+  background: #d9dde3;
+  border-radius: 999px;
+  color: #3d4856;
+  font-size: 0.86rem;
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
+.status.online {
+  background: #d9f2e5;
+  color: var(--success);
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(21, 32, 43, 0.08);
+  padding: 28px;
+}
+
+.center {
+  text-align: center;
+}
+
+.muted {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.joinForm {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.joinForm label {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.inputRow {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr auto;
+}
+
+.inputRow input {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+}
+
+.countdown {
+  color: var(--primary);
+  font-size: 5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.playerList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.playerList span {
+  background: #eef6fa;
+  border: 1px solid #c6dbe7;
+  border-radius: 999px;
+  color: var(--primary-dark);
+  padding: 8px 12px;
+}
+
+.questionPanel {
+  display: grid;
+  gap: 18px;
+}
+
+.questionMeta {
+  display: flex;
+  font-weight: 800;
+  justify-content: space-between;
+}
+
+.options {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.option {
+  align-items: center;
+  background: #f7fafc;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 34px 1fr;
+  min-height: 72px;
+  padding: 14px;
+  text-align: left;
+}
+
+.option:hover:not(:disabled),
+.option.selected {
+  background: #e8f4f9;
+  border-color: var(--primary);
+  color: var(--primary-dark);
+}
+
+.option strong {
+  align-items: center;
+  background: var(--primary);
+  border-radius: 50%;
+  color: #ffffff;
+  display: inline-flex;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.feedback {
+  border-radius: 8px;
+  font-weight: 800;
+  padding: 12px 14px;
+}
+
+.feedback.good {
+  background: #d9f2e5;
+  color: var(--success);
+}
+
+.feedback.bad {
+  background: #ffe4e1;
+  color: var(--danger);
+}
+
+.leaderboard {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 22px 0;
+  padding: 0;
+}
+
+.leaderboard li {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.leaderboard em {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-left: 8px;
+}
+
+.secondary {
+  background: #394b5f;
+}
+
+.error {
+  background: #ffe4e1;
+  border-radius: 8px;
+  color: var(--danger);
+  font-weight: 700;
+  padding: 12px 14px;
+}
+
+.gameInfo {
+  color: var(--muted);
+  margin-top: 16px;
+}
+
+@media (max-width: 680px) {
+  .topbar,
+  .inputRow {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    display: grid;
+  }
+
+  .options {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 20px;
+  }
+}

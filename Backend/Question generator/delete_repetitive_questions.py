@@ -8,9 +8,8 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 BASE_DIR = Path(__file__).resolve().parent
-BACKEND_DIR = BASE_DIR.parent
 
-load_dotenv(BACKEND_DIR / ".env")
+load_dotenv(BASE_DIR / ".env")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 REPETITIVE_RECOGNIZER_MODEL = "gpt-5.4"
 QUESTIONS_FILE = BASE_DIR / "questions.csv"

@@ -4,8 +4,9 @@ from pathlib import Path
 
 # Paths
 BASE_DIR = Path(__file__).resolve().parent
-CSV_PATH = BASE_DIR / "Question generator" / "questions.csv"
-DB_PATH = BASE_DIR / "trivia.db"
+BACKEND_DIR = BASE_DIR.parent
+CSV_PATH = BASE_DIR / "questions.csv"
+DB_PATH = BACKEND_DIR / "trivia.db"
 
 # Table schema
 CREATE_TABLE_SQL = """
