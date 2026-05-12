@@ -1,0 +1,87 @@
+import asyncio
+import random
+import uuid
+
+from helpers import points_for_answer
+
+
+BOT_NAMES = [
+    "Nova",
+    "Zippy",
+    "Pixel",
+    "Blaze",
+    "Echo",
+    "Quark",
+    "Luna",
+    "Milo",
+    "Kira",
+    "Atlas",
+    "Juno",
+    "Rafi",
+    "Sage",
+    "Nico",
+    "Vega",
+    "Skye",
+    "Orion",
+    "Mika",
+]
+
+DIFFICULTY_SETTINGS = {
+    "easy": {"accuracy": 0.40, "delay_min": 2, "delay_max": 8},
+    "medium": {"accuracy": 0.65, "delay_min": 5, "delay_max": 13},
+    "hard": {"accuracy": 0.85, "delay_min": 10, "delay_max": 18},
+}
+
+
+class Bot:
+    def __init__(self, name: str, difficulty: str = "medium"):
+        self.sid = str(uuid.uuid4())
+        self.name = name +  " 🤖"
+        self.difficulty = difficulty
+        self.is_bot = True
+
+    def to_player_dict(self) -> dict:
+        return {
+            "sid": self.sid,
+            "name": self.name,
+            "score": 0,
+            "connected": True,
+            "is_bot": True,
+            "helps": {
+                "fifty_fifty": False,
+                "double_score": False,
+                "call_a_friend": False,
+            },
+        }
+
+    async def answer(self, game: dict, correct_option: str, valid_options: set):
+        settings = DIFFICULTY_SETTINGS[self.difficulty]
+        delay = random.uniform(settings["delay_min"], settings["delay_max"])
+        await asyncio.sleep(delay)
+
+        if game["accepting_answers"] and self.sid not in game["answers"]:
+            if random.random() < settings["accuracy"]:
+                selected = correct_option
+            else:
+                wrong_options = list(valid_options - {correct_option})
+                selected = random.choice(wrong_options)
+
+            game["answers"][self.sid] = selected
+            game["players"][self.sid]["score"] += points_for_answer(
+                selected,
+                correct_option,
+                used_double_score=False,
+            )
+
+
+class BotFactory:
+    @staticmethod
+    def create_bots_for_solo_game() -> list[Bot]:
+        count = random.randint(1, 3)
+        names = BOT_NAMES.copy()
+        random.shuffle(names)
+
+        return [
+            Bot(name=name, difficulty=random.choice(["easy", "medium", "hard"]))
+            for name in names[:count]
+        ]

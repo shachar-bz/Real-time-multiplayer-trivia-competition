@@ -11,6 +11,7 @@ import socketio
 from aiohttp import web
 from dotenv import load_dotenv
 
+from bot import Bot, BotFactory
 from chat import delete_game_chat, register_chat_handlers
 from friend_agent import call_a_friend
 from helpers import points_for_answer
@@ -28,7 +29,7 @@ PORT = 8080
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 DB_PATH = BASE_DIR / "trivia.db"
-MATCHMAKING_SECONDS = 30
+MATCHMAKING_SECONDS = 5
 QUESTION_SECONDS = 20
 QUESTIONS_PER_GAME = 10
 RESULT_SECONDS = 3
@@ -230,6 +231,10 @@ async def matchmaking_countdown():
         waiting_players.clear()
 
         if players:
+            if len(players) == 1:
+                for bot in BotFactory.create_bots_for_solo_game():
+                    players[bot.sid] = bot
+
             asyncio.create_task(run_game(players))
     finally:
         matchmaking_started_at = None
@@ -256,19 +261,22 @@ async def run_game(players):
     games[game_id] = game
 
     for sid, player in players.items():
-        game["players"][sid] = {
-            "sid": sid,
-            "name": player["name"],
-            "score": 0,
-            "connected": True,
-            "helps": {
-                HELP_FIFTY_FIFTY: True,
-                HELP_DOUBLE_SCORE: True,
-                HELP_CALL_A_FRIEND: True,
-            },
-        }
-        player_games[sid] = game_id
-        await sio.enter_room(sid, game_id)
+        if isinstance(player, Bot):
+            game["players"][sid] = player.to_player_dict()
+        else:
+            game["players"][sid] = {
+                "sid": sid,
+                "name": player["name"],
+                "score": 0,
+                "connected": True,
+                "helps": {
+                    HELP_FIFTY_FIFTY: True,
+                    HELP_DOUBLE_SCORE: True,
+                    HELP_CALL_A_FRIEND: True,
+                },
+            }
+            player_games[sid] = game_id
+            await sio.enter_room(sid, game_id)
 
     await sio.emit(
         "game_started",
@@ -281,7 +289,8 @@ async def run_game(players):
         room=game_id,
     )
     for sid, player in game["players"].items():
-        await sio.emit("player_state", {"helps": player_helps(player)}, to=sid)
+        if not isinstance(players[sid], Bot):
+            await sio.emit("player_state", {"helps": player_helps(player)}, to=sid)
 
     for index, question in enumerate(game["questions"]):
         game["current_index"] = index
@@ -295,6 +304,16 @@ async def run_game(players):
         game["accepting_answers"] = True
 
         await sio.emit("question", public_question(question, index), room=game_id)
+        for sid, player in game["players"].items():
+            if isinstance(players[sid], Bot):
+                asyncio.create_task(
+                    players[sid].answer(
+                        game,
+                        question["correct_option"].upper(),
+                        VALID_OPTIONS,
+                    )
+                )
+
         await wait_for_question_timer(game)
 
         game["accepting_answers"] = False
@@ -347,8 +366,9 @@ async def run_game(players):
     await sio.emit("chat_history_cleared", {}, room=game_id)
 
     for sid in list(game["players"]):
-        player_games.pop(sid, None)
-        await sio.leave_room(sid, game_id)
+        if not isinstance(players[sid], Bot):
+            player_games.pop(sid, None)
+            await sio.leave_room(sid, game_id)
     await delete_game_chat(game_id)
     games.pop(game_id, None)
 
