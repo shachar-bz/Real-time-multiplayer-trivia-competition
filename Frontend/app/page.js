@@ -9,6 +9,7 @@ const SERVER_URL = "http://localhost:8080";
 const DEFAULT_MATCHMAKING_SECONDS = 30;
 const DEFAULT_QUESTION_SECONDS = 20;
 const DEFAULT_QUESTIONS_PER_GAME = 10;
+const GAME_COUNTDOWN_SECONDS = 4;
 const HELP_FIFTY_FIFTY = "fifty_fifty";
 const HELP_DOUBLE_SCORE = "double_score";
 const HELP_CALL_A_FRIEND = "call_a_friend";
@@ -19,6 +20,8 @@ const SOUND_EFFECTS = {
   submit_answer: "/sounds/submit_answer.mp3",
   click_possible_answer: "/sounds/click_possible_answer.mp3",
   call_friend: "/sounds/call_friend.mp3",
+  ticking_clock: "/sounds/ticking_clock.mp3",
+  game_countdown: "/sounds/game_countdown.mp3",
 };
 const EMPTY_RACE_STANDINGS = {
   finishScore: 0,
@@ -30,6 +33,7 @@ export default function Home() {
   const socketRef = useRef(null);
   const soundRefs = useRef({});
   const activeSoundRefs = useRef({});
+  const gameCountdownPlayedRef = useRef(false);
   const chatListRef = useRef(null);
   const chatOpenRef = useRef(false);
   const [phase, setPhase] = useState("intro");
@@ -124,7 +128,7 @@ export default function Home() {
   );
 
   const playManagedSound = useCallback(
-    (name) => {
+    (name, options = {}) => {
       const audio = ensureSoundAudio(name);
       if (!audio) {
         return;
@@ -132,6 +136,7 @@ export default function Home() {
 
       audio.pause();
       audio.currentTime = 0;
+      audio.loop = Boolean(options.loop);
       activeSoundRefs.current[name] = audio;
       audio.play().catch(() => {});
     },
@@ -146,6 +151,7 @@ export default function Home() {
 
     audio.pause();
     audio.currentTime = 0;
+    audio.loop = false;
     delete activeSoundRefs.current[name];
   }, []);
 
@@ -200,9 +206,20 @@ export default function Home() {
     socket.on("matchmaking_status", (status) => {
       setPhase("waiting");
       setWaiting(status);
+      if (status.secondsLeft > GAME_COUNTDOWN_SECONDS) {
+        gameCountdownPlayedRef.current = false;
+      }
+      if (
+        status.secondsLeft === GAME_COUNTDOWN_SECONDS &&
+        !gameCountdownPlayedRef.current
+      ) {
+        gameCountdownPlayedRef.current = true;
+        playSoundEffect({ name: "game_countdown" });
+      }
     });
     socket.on("game_started", (info) => {
       stopManagedSound("call_friend");
+      stopManagedSound("ticking_clock");
       setPhase("game");
       setGameInfo(info);
       setLeaderboard([]);
@@ -280,6 +297,7 @@ export default function Home() {
       setRaceStandings(standings || EMPTY_RACE_STANDINGS);
     });
     socket.on("question_result", (questionResult) => {
+      stopManagedSound("ticking_clock");
       setPhase("result");
       setResult(questionResult);
       setLeaderboard(questionResult.leaderboard);
@@ -316,6 +334,7 @@ export default function Home() {
       }
     });
     socket.on("question_timer_paused", (pauseInfo) => {
+      stopManagedSound("ticking_clock");
       setTimeLeft(pauseInfo.secondsLeft);
       setQuestionEndsAt(null);
       if (pauseInfo.callerId === socket.id) {
@@ -361,6 +380,7 @@ export default function Home() {
     });
     socket.on("game_finished", (summary) => {
       stopManagedSound("call_friend");
+      stopManagedSound("ticking_clock");
       setPhase("finished");
       setLeaderboard(summary.leaderboard);
       setRaceStandings(summary.raceStandings || EMPTY_RACE_STANDINGS);
@@ -400,6 +420,7 @@ export default function Home() {
 
     return () => {
       stopManagedSound("call_friend");
+      stopManagedSound("ticking_clock");
       socket.disconnect();
     };
   }, [
@@ -421,6 +442,16 @@ export default function Home() {
 
     return () => window.clearInterval(timer);
   }, [questionEndsAt]);
+
+  useEffect(() => {
+    if (phase !== "game" || !questionEndsAt) {
+      stopManagedSound("ticking_clock");
+      return undefined;
+    }
+
+    playManagedSound("ticking_clock", { loop: true });
+    return () => stopManagedSound("ticking_clock");
+  }, [phase, questionEndsAt, playManagedSound, stopManagedSound]);
 
   const myResult = useMemo(() => {
     if (!result || !socketRef.current) {
@@ -581,7 +612,7 @@ export default function Home() {
             <span>
               Question {question.index}/{question.total}
             </span>
-            <span>{timeLeft}s</span>
+            <span>{timeLeft}</span>
           </div>
           <p className="topic">
             {question.topic} · Difficulty {question.difficulty}
