@@ -17,12 +17,14 @@ const SOUND_EFFECTS = {
   win_game: "/sounds/win_game.mp3",
   submit_answer: "/sounds/submit_answer.mp3",
   click_possible_answer: "/sounds/click_possible_answer.mp3",
+  call_friend: "/sounds/call_friend.mp3",
 };
 
 
 export default function Home() {
   const socketRef = useRef(null);
   const soundRefs = useRef({});
+  const activeSoundRefs = useRef({});
   const chatListRef = useRef(null);
   const chatOpenRef = useRef(false);
   const [phase, setPhase] = useState("intro");
@@ -114,6 +116,32 @@ export default function Home() {
     [ensureSoundAudio]
   );
 
+  const playManagedSound = useCallback(
+    (name) => {
+      const audio = ensureSoundAudio(name);
+      if (!audio) {
+        return;
+      }
+
+      audio.pause();
+      audio.currentTime = 0;
+      activeSoundRefs.current[name] = audio;
+      audio.play().catch(() => {});
+    },
+    [ensureSoundAudio]
+  );
+
+  const stopManagedSound = useCallback((name) => {
+    const audio = activeSoundRefs.current[name];
+    if (!audio) {
+      return;
+    }
+
+    audio.pause();
+    audio.currentTime = 0;
+    delete activeSoundRefs.current[name];
+  }, []);
+
   const primeSoundEffects = useCallback(() => {
     Object.keys(SOUND_EFFECTS).forEach((name) => {
       const audio = ensureSoundAudio(name);
@@ -163,6 +191,7 @@ export default function Home() {
       setWaiting(status);
     });
     socket.on("game_started", (info) => {
+      stopManagedSound("call_friend");
       setPhase("game");
       setGameInfo(info);
       setLeaderboard([]);
@@ -190,6 +219,7 @@ export default function Home() {
       setHelps(state.helps);
     });
     socket.on("question", (nextQuestion) => {
+      stopManagedSound("call_friend");
       setPhase("game");
       setQuestion(nextQuestion);
       setSelectedOption(null);
@@ -258,6 +288,7 @@ export default function Home() {
         setDoubleScoreActive(Boolean(helpResult.doubleScoreActive));
       }
       if (helpResult.helpType === HELP_CALL_A_FRIEND) {
+        stopManagedSound("call_friend");
         setFriendPopup({
           open: true,
           loading: false,
@@ -272,6 +303,7 @@ export default function Home() {
       setTimeLeft(pauseInfo.secondsLeft);
       setQuestionEndsAt(null);
       if (pauseInfo.callerId === socket.id) {
+        playManagedSound("call_friend");
         setFriendPopup({
           open: true,
           loading: true,
@@ -293,6 +325,7 @@ export default function Home() {
       });
     });
     socket.on("question_timer_resumed", (resumeInfo) => {
+      stopManagedSound("call_friend");
       setTimeLeft(resumeInfo.secondsLeft);
       setQuestionEndsAt(Date.now() + resumeInfo.secondsLeft * 1000);
       setFriendPopup((currentPopup) => {
@@ -311,6 +344,7 @@ export default function Home() {
       });
     });
     socket.on("game_finished", (summary) => {
+      stopManagedSound("call_friend");
       setPhase("finished");
       setLeaderboard(summary.leaderboard);
       setQuestion(null);
@@ -331,6 +365,7 @@ export default function Home() {
       });
     });
     socket.on("error_message", (error) => {
+      stopManagedSound("call_friend");
       setErrorMessage(error.message);
       setFriendPopup((currentPopup) =>
         currentPopup.loading
@@ -347,9 +382,16 @@ export default function Home() {
     });
 
     return () => {
+      stopManagedSound("call_friend");
       socket.disconnect();
     };
-  }, [ensureSoundAudio, playSoundEffect, scrollChatToBottom]);
+  }, [
+    ensureSoundAudio,
+    playManagedSound,
+    playSoundEffect,
+    scrollChatToBottom,
+    stopManagedSound,
+  ]);
 
   useEffect(() => {
     if (!questionEndsAt) {

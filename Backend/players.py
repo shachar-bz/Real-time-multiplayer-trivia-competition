@@ -48,14 +48,10 @@ def leaderboard_for(game):
             "name": player["name"],
             "score": player["score"],
             "connected": player["connected"],
-            "isBot": player.get("is_bot", False),
         }
         for player in players
     ]
 
 
 def game_started_players(game):
-    return [
-        {"name": player["name"], "isBot": player.get("is_bot", False)}
-        for player in game["players"].values()
-    ]
+    return [player["name"] for player in game["players"].values()]
