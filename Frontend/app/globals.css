@@ -166,6 +166,20 @@ button:disabled {
   justify-content: space-between;
 }
 
+.helps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.helpButton {
+  background: #394b5f;
+}
+
+.helpButton.active {
+  background: var(--success);
+}
+
 .options {
   display: grid;
   gap: 12px;
@@ -190,6 +204,13 @@ button:disabled {
   background: #e8f4f9;
   border-color: var(--primary);
   color: var(--primary-dark);
+}
+
+.option.removed {
+  background: #edf0f4;
+  border-color: #c3ccd7;
+  color: #7d8896;
+  text-decoration: line-through;
 }
 
 .option strong {
@@ -252,6 +273,43 @@ button:disabled {
   color: var(--danger);
   font-weight: 700;
   padding: 12px 14px;
+}
+
+.modalBackdrop {
+  align-items: center;
+  background: rgba(21, 32, 43, 0.45);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  padding: 20px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 20;
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 24px 70px rgba(21, 32, 43, 0.28);
+  display: grid;
+  gap: 14px;
+  max-width: 520px;
+  padding: 24px;
+  width: min(100%, 520px);
+}
+
+.modal h2,
+.modal p {
+  margin: 0;
+}
+
+.friendMessage {
+  color: var(--ink);
+  line-height: 1.6;
+  white-space: pre-wrap;
 }
 
 .gameInfo {

@@ -2,3 +2,4 @@ openai
 python-dotenv
 python-socketio
 aiohttp
+pydantic-ai-slim[openai]
