@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { io } from "socket.io-client";
+import WelcomePage from "./welcome_page";
 
 
 const SERVER_URL = "http://localhost:8080";
@@ -413,7 +414,7 @@ export default function Home() {
     return result.answers.find((answer) => answer.playerId === socketRef.current.id);
   }, [result]);
 
-  function joinQueue(event) {
+  function joinQueue(event, profile = {}) {
     event.preventDefault();
     primeSoundEffects();
     setErrorMessage("");
@@ -423,7 +424,11 @@ export default function Home() {
       playerCount: 1,
       players: [playerName.trim() || "Player"],
     });
-    socketRef.current?.emit("join_queue", { name: playerName });
+    socketRef.current?.emit("join_queue", {
+      name: playerName,
+      ride: profile.ride,
+      paint: profile.paint,
+    });
   }
 
   function chooseAnswer(option) {
@@ -493,6 +498,17 @@ export default function Home() {
     setChatInput("");
   }
 
+  if (phase === "intro") {
+    return (
+      <WelcomePage
+        errorMessage={errorMessage}
+        onPlayerNameChange={setPlayerName}
+        onStart={joinQueue}
+        playerName={playerName}
+      />
+    );
+  }
+
   return (
     <main className="shell">
       <section className="topbar" aria-label="Game status">
@@ -504,29 +520,6 @@ export default function Home() {
           {connectionStatus}
         </span>
       </section>
-
-      {phase === "intro" && (
-        <section className="panel">
-          <h2>Join the next game</h2>
-          <p className="muted">
-            The server opens matchmaking for {config.matchmakingSeconds} seconds, then starts a{" "}
-            {config.questionsPerGame}-question trivia round with everyone who joined.
-          </p>
-          <form className="joinForm" onSubmit={joinQueue}>
-            <label htmlFor="playerName">Player name</label>
-            <div className="inputRow">
-              <input
-                id="playerName"
-                maxLength={24}
-                onChange={(event) => setPlayerName(event.target.value)}
-                placeholder="Enter your name"
-                value={playerName}
-              />
-              <button type="submit">Start</button>
-            </div>
-          </form>
-        </section>
-      )}
 
       {phase === "waiting" && (
         <section className="panel center">

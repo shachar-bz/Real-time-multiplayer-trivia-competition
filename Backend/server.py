@@ -15,8 +15,10 @@ from bot import BotFactory
 from chat import delete_game_chat, register_chat_handlers
 from friend_agent import call_a_friend
 from helpers import points_for_answer
+from player_profile import normalize_paint, normalize_ride, player_profile, profile_choices
 from players import (
     game_started_players,
+    game_started_player_names,
     is_bot_entry,
     leaderboard_for,
     player_dict_for_game,
@@ -107,6 +109,9 @@ def waiting_status(start_time):
         "secondsLeft": seconds_left,
         "playerCount": len(waiting_players),
         "players": [player["name"] for player in waiting_players.values()],
+        "playerProfiles": [
+            player_profile(player) for player in waiting_players.values()
+        ],
     }
 
 
@@ -264,7 +269,8 @@ async def run_game(players):
         "game_started",
         {
             "gameId": game_id,
-            "players": game_started_players(game),
+            "players": game_started_player_names(game),
+            "playerProfiles": game_started_players(game),
             "questionCount": QUESTIONS_PER_GAME,
             "questionSeconds": QUESTION_SECONDS,
         },
@@ -272,7 +278,14 @@ async def run_game(players):
     )
     for sid, player in game["players"].items():
         if not player.get("is_bot"):
-            await sio.emit("player_state", {"helps": player_helps(player)}, to=sid)
+            await sio.emit(
+                "player_state",
+                {
+                    "helps": player_helps(player),
+                    "profile": player_profile(player),
+                },
+                to=sid,
+            )
 
     for index, question in enumerate(game["questions"]):
         game["current_index"] = index
@@ -312,6 +325,8 @@ async def run_game(players):
                 {
                     "playerId": sid,
                     "name": player["name"],
+                    "ride": player["ride"],
+                    "paint": player["paint"],
                     "selectedOption": selected_option,
                     "isCorrect": is_correct,
                     "doubleScoreUsed": used_double_score,
@@ -365,6 +380,7 @@ async def connect(sid, environ):
             "matchmakingSeconds": MATCHMAKING_SECONDS,
             "questionSeconds": QUESTION_SECONDS,
             "questionsPerGame": QUESTIONS_PER_GAME,
+            "profileChoices": profile_choices(),
         },
         to=sid,
     )
@@ -391,7 +407,14 @@ async def join_queue(sid, data):
 
     raw_name = str((data or {}).get("name", "")).strip()
     player_name = raw_name[:24] or f"Player {random.randint(100, 999)}"
-    waiting_players[sid] = {"sid": sid, "name": player_name}
+    ride = normalize_ride((data or {}).get("ride"))
+    paint = normalize_paint((data or {}).get("paint"))
+    waiting_players[sid] = {
+        "sid": sid,
+        "name": player_name,
+        "ride": ride,
+        "paint": paint,
+    }
 
     if matchmaking_task is None or matchmaking_task.done():
         matchmaking_task = asyncio.create_task(matchmaking_countdown())

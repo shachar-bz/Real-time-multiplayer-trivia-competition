@@ -4,6 +4,7 @@ import time
 import uuid
 
 from helpers import points_for_answer
+from player_profile import PAINT_CHOICES, RIDE_CHOICES
 
 
 BOT_NAMES = [
@@ -35,16 +36,26 @@ DIFFICULTY_SETTINGS = {
 
 
 class Bot:
-    def __init__(self, name: str, difficulty: str = "medium"):
+    def __init__(
+        self,
+        name: str,
+        difficulty: str = "medium",
+        ride: str = None,
+        paint: str = None,
+    ):
         self.sid = str(uuid.uuid4())
         self.name = name +  " 🤖"
         self.difficulty = difficulty
         self.is_bot = True
+        self.ride = ride or random.choice(list(RIDE_CHOICES))
+        self.paint = paint or random.choice(list(PAINT_CHOICES))
 
     def to_player_dict(self) -> dict:
         return {
             "sid": self.sid,
             "name": self.name,
+            "ride": self.ride,
+            "paint": self.paint,
             "score": 0,
             "connected": True,
             "is_bot": True,

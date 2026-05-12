@@ -1,4 +1,5 @@
 from bot import Bot
+from player_profile import DEFAULT_PAINT, DEFAULT_RIDE, player_profile
 
 
 HELP_FIFTY_FIFTY = "fifty_fifty"
@@ -25,6 +26,8 @@ def player_dict_for_game(sid, player):
     return {
         "sid": sid,
         "name": player["name"],
+        "ride": player.get("ride", DEFAULT_RIDE),
+        "paint": player.get("paint", DEFAULT_PAINT),
         "score": 0,
         "connected": True,
         "helps": default_human_helps(),
@@ -42,16 +45,30 @@ def player_helps(player):
 def leaderboard_for(game):
     players = list(game["players"].values())
     players.sort(key=lambda player: (-player["score"], player["name"].lower()))
-    return [
-        {
-            "id": player["sid"],
-            "name": player["name"],
-            "score": player["score"],
-            "connected": player["connected"],
-        }
-        for player in players
-    ]
+    leaderboard = []
+
+    for player in players:
+        profile = player_profile(player)
+        leaderboard.append(
+            {
+                "id": player["sid"],
+                "name": player["name"],
+                "ride": player["ride"],
+                "rideLabel": profile["rideLabel"],
+                "paint": player["paint"],
+                "paintLabel": profile["paintLabel"],
+                "paintHex": profile["paintHex"],
+                "score": player["score"],
+                "connected": player["connected"],
+            }
+        )
+
+    return leaderboard
 
 
 def game_started_players(game):
+    return [player_profile(player) for player in game["players"].values()]
+
+
+def game_started_player_names(game):
     return [player["name"] for player in game["players"].values()]
