@@ -23,6 +23,7 @@ from players import (
     leaderboard_for,
     player_dict_for_game,
     player_helps,
+    race_standings_for,
 )
 from sound_events import (
     SOUND_SUBMIT_ANSWER,
@@ -42,6 +43,8 @@ MATCHMAKING_SECONDS = 10
 QUESTION_SECONDS = 20
 QUESTIONS_PER_GAME = 10
 RESULT_SECONDS = 3
+MAX_SCORE_PER_QUESTION = 600
+RACE_FINISH_SCORE = (QUESTIONS_PER_GAME + 1) * MAX_SCORE_PER_QUESTION
 CLIENT_URL = os.getenv("CLIENT_URL", "http://localhost:8081")
 VALID_OPTIONS = {"A", "B", "C", "D"}
 HELP_FIFTY_FIFTY = "fifty_fifty"
@@ -127,6 +130,14 @@ def remaining_time_for_score(game):
         return game["timer_remaining_seconds"]
 
     return max(0, game["question_deadline"] - time.monotonic())
+
+
+def race_standings_payload(game):
+    return race_standings_for(game, game["race_finish_score"])
+
+
+async def emit_race_standings(game):
+    await sio.emit("race_standings", race_standings_payload(game), room=game["id"])
 
 
 def all_connected_players_answered(game):
@@ -238,6 +249,15 @@ async def matchmaking_countdown():
         matchmaking_task = None
 
 
+async def run_bot_answer(bot, game, correct_option):
+    await bot.answer(
+        game,
+        correct_option,
+        VALID_OPTIONS,
+        on_score_change=emit_race_standings,
+    )
+
+
 async def run_game(players):
     game_id = str(uuid.uuid4())
     game = {
@@ -256,6 +276,7 @@ async def run_game(players):
         "timer_remaining_seconds": QUESTION_SECONDS,
         "timer_lock": asyncio.Lock(),
         "call_friend_in_progress": False,
+        "race_finish_score": RACE_FINISH_SCORE,
     }
     games[game_id] = game
 
@@ -273,9 +294,11 @@ async def run_game(players):
             "playerProfiles": game_started_players(game),
             "questionCount": QUESTIONS_PER_GAME,
             "questionSeconds": QUESTION_SECONDS,
+            "raceStandings": race_standings_payload(game),
         },
         room=game_id,
     )
+    await emit_race_standings(game)
     for sid, player in game["players"].items():
         if not player.get("is_bot"):
             await sio.emit(
@@ -303,10 +326,10 @@ async def run_game(players):
         for sid, player in game["players"].items():
             if player.get("is_bot"):
                 asyncio.create_task(
-                    players[sid].answer(
+                    run_bot_answer(
+                        players[sid],
                         game,
                         question["correct_option"].upper(),
-                        VALID_OPTIONS,
                     )
                 )
 
@@ -342,6 +365,7 @@ async def run_game(players):
                 "correctAnswer": question[f"option_{correct_option.lower()}"],
                 "answers": answers,
                 "leaderboard": leaderboard_for(game),
+                "raceStandings": race_standings_payload(game),
             },
             room=game_id,
         )
@@ -350,7 +374,11 @@ async def run_game(players):
     final_leaderboard = leaderboard_for(game)
     await sio.emit(
         "game_finished",
-        {"leaderboard": final_leaderboard, "questionCount": QUESTIONS_PER_GAME},
+        {
+            "leaderboard": final_leaderboard,
+            "questionCount": QUESTIONS_PER_GAME,
+            "raceStandings": race_standings_payload(game),
+        },
         room=game_id,
     )
     if final_leaderboard:
@@ -394,7 +422,9 @@ async def disconnect(sid):
 
     game_id = player_games.get(sid)
     if game_id and game_id in games and sid in games[game_id]["players"]:
-        games[game_id]["players"][sid]["connected"] = False
+        game = games[game_id]
+        game["players"][sid]["connected"] = False
+        await emit_race_standings(game)
 
 
 @sio.event
@@ -462,6 +492,7 @@ async def answer(sid, data):
         {"questionId": question_id, "selectedOption": selected_option},
         to=sid,
     )
+    await emit_race_standings(game)
 
 
 @sio.event

@@ -20,6 +20,10 @@ const SOUND_EFFECTS = {
   click_possible_answer: "/sounds/click_possible_answer.mp3",
   call_friend: "/sounds/call_friend.mp3",
 };
+const EMPTY_RACE_STANDINGS = {
+  finishScore: 0,
+  players: [],
+};
 
 
 export default function Home() {
@@ -30,6 +34,7 @@ export default function Home() {
   const chatOpenRef = useRef(false);
   const [phase, setPhase] = useState("intro");
   const [connectionStatus, setConnectionStatus] = useState("Disconnected");
+  const [currentPlayerId, setCurrentPlayerId] = useState(null);
   const [playerName, setPlayerName] = useState("");
   const [config, setConfig] = useState({
     matchmakingSeconds: DEFAULT_MATCHMAKING_SECONDS,
@@ -64,6 +69,7 @@ export default function Home() {
   const [questionEndsAt, setQuestionEndsAt] = useState(null);
   const [result, setResult] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [raceStandings, setRaceStandings] = useState(EMPTY_RACE_STANDINGS);
   const [errorMessage, setErrorMessage] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
@@ -178,9 +184,13 @@ export default function Home() {
     });
     socketRef.current = socket;
 
-    socket.on("connect", () => setConnectionStatus("Connected"));
+    socket.on("connect", () => {
+      setConnectionStatus("Connected");
+      setCurrentPlayerId(socket.id);
+    });
     socket.on("disconnect", () => setConnectionStatus("Disconnected"));
     socket.on("connected", (serverConfig) => {
+      setCurrentPlayerId(serverConfig.sid);
       setConfig({
         matchmakingSeconds: serverConfig.matchmakingSeconds,
         questionSeconds: serverConfig.questionSeconds,
@@ -196,6 +206,7 @@ export default function Home() {
       setPhase("game");
       setGameInfo(info);
       setLeaderboard([]);
+      setRaceStandings(info.raceStandings || EMPTY_RACE_STANDINGS);
       setResult(null);
       setErrorMessage("");
       setChatOpen(false);
@@ -265,10 +276,14 @@ export default function Home() {
       setChatMessages([]);
       setChatUnreadCount(0);
     });
+    socket.on("race_standings", (standings) => {
+      setRaceStandings(standings || EMPTY_RACE_STANDINGS);
+    });
     socket.on("question_result", (questionResult) => {
       setPhase("result");
       setResult(questionResult);
       setLeaderboard(questionResult.leaderboard);
+      setRaceStandings(questionResult.raceStandings || EMPTY_RACE_STANDINGS);
       setQuestionEndsAt(null);
       setTimeLeft(0);
       const currentPlayerResult = questionResult.answers.find(
@@ -348,6 +363,7 @@ export default function Home() {
       stopManagedSound("call_friend");
       setPhase("finished");
       setLeaderboard(summary.leaderboard);
+      setRaceStandings(summary.raceStandings || EMPTY_RACE_STANDINGS);
       setQuestion(null);
       setResult(null);
       setGameInfo(null);
@@ -498,6 +514,14 @@ export default function Home() {
     setChatInput("");
   }
 
+  const activeRaceStandings =
+    raceStandings?.players?.length > 0
+      ? raceStandings
+      : gameInfo?.raceStandings || EMPTY_RACE_STANDINGS;
+  const showRaceTrack =
+    (phase === "game" || phase === "result" || phase === "finished") &&
+    activeRaceStandings.players.length > 0;
+
   if (phase === "intro") {
     return (
       <WelcomePage
@@ -510,12 +534,25 @@ export default function Home() {
   }
 
   return (
-    <main className="shell">
-      <section className="topbar" aria-label="Game status">
-        <div>
-          <p className="eyebrow">Multiplayer Trivia</p>
-          <h1>Socket.IO Competition</h1>
-        </div>
+    <main className={phase === "waiting" ? "waitingShell" : "gameShell"}>
+      {phase !== "waiting" && <div className="gameBackdrop" aria-hidden="true" />}
+
+      <section
+        className={phase === "waiting" ? "topbar waitingTopbar" : "gameTopbar"}
+        aria-label="Game status"
+      >
+        {phase === "waiting" ? (
+          <div>
+            <p className="eyebrow">Nitro Trivia</p>
+            <h1>Matchmaking</h1>
+          </div>
+        ) : (
+          <div className="roundBadge">
+            {phase === "finished"
+              ? "Final lap"
+              : `Round ${question?.index || 1}/${question?.total || config.questionsPerGame}`}
+          </div>
+        )}
         <span className={connectionStatus === "Connected" ? "status online" : "status"}>
           {connectionStatus}
         </span>
@@ -623,7 +660,14 @@ export default function Home() {
           <p className="eyebrow">Final leaderboard</p>
           <h2>Game complete</h2>
           <Leaderboard leaderboard={leaderboard} />
-          <button className="secondary" onClick={() => setPhase("intro")} type="button">
+          <button
+            className="secondary"
+            onClick={() => {
+              setRaceStandings(EMPTY_RACE_STANDINGS);
+              setPhase("intro");
+            }}
+            type="button"
+          >
             Play again
           </button>
         </section>
@@ -710,7 +754,84 @@ export default function Home() {
           )}
         </aside>
       )}
+
+      {showRaceTrack && (
+        <RaceTrack
+          currentPlayerId={currentPlayerId}
+          standings={activeRaceStandings}
+        />
+      )}
     </main>
+  );
+}
+
+
+function RaceTrack({ currentPlayerId, standings }) {
+  const players = standings?.players || [];
+
+  if (!players.length) {
+    return null;
+  }
+
+  return (
+    <section className="raceTrack" aria-label="Live race standings">
+      <div className="raceHeader">
+        <h2>Live Race Standings</h2>
+        <div className="finishLabel">
+          <span aria-hidden="true">|&gt;</span>
+          <span>Finish Line</span>
+        </div>
+      </div>
+      <div className="trackLanes" style={{ "--lane-count": players.length }}>
+        <div className="finishLine" aria-hidden="true" />
+        {players.map((player) => (
+          <RaceLane
+            isCurrentPlayer={player.id === currentPlayerId}
+            key={player.id}
+            player={player}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+
+function RaceLane({ isCurrentPlayer, player }) {
+  const progressRatio = Math.max(0, Math.min(1, Number(player.progressRatio) || 0));
+  const progressPercent = Math.round(progressRatio * 100);
+  const vehicleLeft = `${4 + progressRatio * 88}%`;
+
+  return (
+    <div className={isCurrentPlayer ? "raceLane current" : "raceLane"}>
+      <div
+        className="laneVehicle"
+        style={{
+          "--vehicle-left": vehicleLeft,
+          "--lane-color": player.paintHex || "#00d2fd",
+        }}
+      >
+        <span className="racerName">{isCurrentPlayer ? "YOU" : player.name}</span>
+        <span className="vehicleBadge" title={player.rideLabel || player.ride}>
+          <VehicleIcon ride={player.ride} />
+        </span>
+        <span className="laneScore">{player.score}</span>
+      </div>
+      <span className="laneProgress" style={{ width: `${progressPercent}%` }} />
+    </div>
+  );
+}
+
+
+function VehicleIcon({ ride }) {
+  const rideClass = String(ride || "sports_car").replaceAll("-", "_");
+
+  return (
+    <span className={`vehicleIcon vehicleIcon-${rideClass}`} aria-hidden="true">
+      <span className="vehicleBody" />
+      <span className="vehicleWheel first" />
+      <span className="vehicleWheel second" />
+    </span>
   );
 }
 

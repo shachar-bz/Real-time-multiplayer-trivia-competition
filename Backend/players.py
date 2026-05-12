@@ -66,6 +66,35 @@ def leaderboard_for(game):
     return leaderboard
 
 
+def race_standings_for(game, finish_score):
+    safe_finish_score = max(1, finish_score)
+    standings = []
+
+    for player in game["players"].values():
+        profile = player_profile(player)
+        score = player["score"]
+        standings.append(
+            {
+                "id": player["sid"],
+                "name": player["name"],
+                "ride": profile["ride"],
+                "rideLabel": profile["rideLabel"],
+                "paint": profile["paint"],
+                "paintLabel": profile["paintLabel"],
+                "paintHex": profile["paintHex"],
+                "score": score,
+                "progressRatio": max(0, min(1, score / safe_finish_score)),
+                "connected": player["connected"],
+                "isBot": profile["isBot"],
+            }
+        )
+
+    return {
+        "finishScore": finish_score,
+        "players": standings,
+    }
+
+
 def game_started_players(game):
     return [player_profile(player) for player in game["players"].values()]
 

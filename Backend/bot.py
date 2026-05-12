@@ -66,7 +66,13 @@ class Bot:
             },
         }
 
-    async def answer(self, game: dict, correct_option: str, valid_options: set):
+    async def answer(
+        self,
+        game: dict,
+        correct_option: str,
+        valid_options: set,
+        on_score_change=None,
+    ):
         settings = DIFFICULTY_SETTINGS[self.difficulty]
         delay = random.uniform(settings["delay_min"], settings["delay_max"])
         await asyncio.sleep(delay)
@@ -93,6 +99,8 @@ class Bot:
             )
             game["players"][self.sid]["score"] += points_earned
             game["answer_points"][self.sid] = points_earned
+            if on_score_change is not None:
+                await on_score_change(game)
 
 
 class BotFactory:
