@@ -7,12 +7,14 @@ SOUND_WRONG_ANSWER = "wrong_answer"
 SOUND_WIN_GAME = "win_game"
 SOUND_SUBMIT_ANSWER = "submit_answer"
 SOUND_CHAT_MESSAGE = "chat_message"
+SOUND_CLICK_POSSIBLE_ANSWER = "click_possible_answer"
 SOUND_FILES = {
     SOUND_CORRECT_ANSWER: "correct_answer.mp3",
     SOUND_WRONG_ANSWER: "wrong_answer.mp3",
     SOUND_WIN_GAME: "win_game.mp3",
     SOUND_SUBMIT_ANSWER: "submit_answer.mp3",
     SOUND_CHAT_MESSAGE: "chat_message.mp3",
+    SOUND_CLICK_POSSIBLE_ANSWER: "click_possible_answer.mp3",
 }
 SOUND_EVENT = "sound_effect"
 SOUNDS_ROUTE = "/sounds"

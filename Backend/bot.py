@@ -1,5 +1,6 @@
 import asyncio
 import random
+import time
 import uuid
 
 from helpers import points_for_answer
@@ -67,11 +68,20 @@ class Bot:
                 selected = random.choice(wrong_options)
 
             game["answers"][self.sid] = selected
-            game["players"][self.sid]["score"] += points_for_answer(
+            if game["question_timer_paused"]:
+                remaining_time = game["timer_remaining_seconds"]
+            else:
+                remaining_time = max(0, game["question_deadline"] - time.monotonic())
+
+            points_earned = points_for_answer(
                 selected,
                 correct_option,
                 used_double_score=False,
+                remaining_time=remaining_time,
+                total_time=game["question_seconds"],
             )
+            game["players"][self.sid]["score"] += points_earned
+            game["answer_points"][self.sid] = points_earned
 
 
 class BotFactory:

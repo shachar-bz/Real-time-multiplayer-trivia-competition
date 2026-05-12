@@ -11,10 +11,17 @@ import socketio
 from aiohttp import web
 from dotenv import load_dotenv
 
-from bot import Bot, BotFactory
+from bot import BotFactory
 from chat import delete_game_chat, register_chat_handlers
 from friend_agent import call_a_friend
 from helpers import points_for_answer
+from players import (
+    game_started_players,
+    is_bot_entry,
+    leaderboard_for,
+    player_dict_for_game,
+    player_helps,
+)
 from sound_events import (
     SOUND_SUBMIT_ANSWER,
     SOUND_WIN_GAME,
@@ -29,7 +36,7 @@ PORT = 8080
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 DB_PATH = BASE_DIR / "trivia.db"
-MATCHMAKING_SECONDS = 5
+MATCHMAKING_SECONDS = 10
 QUESTION_SECONDS = 20
 QUESTIONS_PER_GAME = 10
 RESULT_SECONDS = 3
@@ -93,28 +100,6 @@ def public_question(question, index):
     }
 
 
-def player_helps(player):
-    return {
-        "fiftyFifty": player["helps"][HELP_FIFTY_FIFTY],
-        "doubleScore": player["helps"][HELP_DOUBLE_SCORE],
-        "callFriend": player["helps"][HELP_CALL_A_FRIEND],
-    }
-
-
-def leaderboard_for(game):
-    players = list(game["players"].values())
-    players.sort(key=lambda player: (-player["score"], player["name"].lower()))
-    return [
-        {
-            "id": player["sid"],
-            "name": player["name"],
-            "score": player["score"],
-            "connected": player["connected"],
-        }
-        for player in players
-    ]
-
-
 def waiting_status(start_time):
     seconds_passed = time.monotonic() - start_time
     seconds_left = max(0, MATCHMAKING_SECONDS - int(seconds_passed))
@@ -130,6 +115,13 @@ def seconds_left_for_game(game):
         return math.ceil(game["timer_remaining_seconds"])
 
     return max(0, math.ceil(game["question_deadline"] - time.monotonic()))
+
+
+def remaining_time_for_score(game):
+    if game["question_timer_paused"]:
+        return game["timer_remaining_seconds"]
+
+    return max(0, game["question_deadline"] - time.monotonic())
 
 
 def all_connected_players_answered(game):
@@ -250,10 +242,12 @@ async def run_game(players):
         "current_index": -1,
         "accepting_answers": False,
         "answers": {},
+        "answer_points": {},
         "double_score_players": set(),
         "removed_options_by_player": {},
         "question_deadline": None,
         "question_timer_paused": False,
+        "question_seconds": QUESTION_SECONDS,
         "timer_remaining_seconds": QUESTION_SECONDS,
         "timer_lock": asyncio.Lock(),
         "call_friend_in_progress": False,
@@ -261,20 +255,8 @@ async def run_game(players):
     games[game_id] = game
 
     for sid, player in players.items():
-        if isinstance(player, Bot):
-            game["players"][sid] = player.to_player_dict()
-        else:
-            game["players"][sid] = {
-                "sid": sid,
-                "name": player["name"],
-                "score": 0,
-                "connected": True,
-                "helps": {
-                    HELP_FIFTY_FIFTY: True,
-                    HELP_DOUBLE_SCORE: True,
-                    HELP_CALL_A_FRIEND: True,
-                },
-            }
+        game["players"][sid] = player_dict_for_game(sid, player)
+        if not is_bot_entry(player):
             player_games[sid] = game_id
             await sio.enter_room(sid, game_id)
 
@@ -282,19 +264,20 @@ async def run_game(players):
         "game_started",
         {
             "gameId": game_id,
-            "players": [player["name"] for player in game["players"].values()],
+            "players": game_started_players(game),
             "questionCount": QUESTIONS_PER_GAME,
             "questionSeconds": QUESTION_SECONDS,
         },
         room=game_id,
     )
     for sid, player in game["players"].items():
-        if not isinstance(players[sid], Bot):
+        if not player.get("is_bot"):
             await sio.emit("player_state", {"helps": player_helps(player)}, to=sid)
 
     for index, question in enumerate(game["questions"]):
         game["current_index"] = index
         game["answers"] = {}
+        game["answer_points"] = {}
         game["double_score_players"] = set()
         game["removed_options_by_player"] = {}
         game["question_deadline"] = time.monotonic() + QUESTION_SECONDS
@@ -305,7 +288,7 @@ async def run_game(players):
 
         await sio.emit("question", public_question(question, index), room=game_id)
         for sid, player in game["players"].items():
-            if isinstance(players[sid], Bot):
+            if player.get("is_bot"):
                 asyncio.create_task(
                     players[sid].answer(
                         game,
@@ -324,7 +307,7 @@ async def run_game(players):
             selected_option = game["answers"].get(sid)
             is_correct = selected_option == correct_option
             used_double_score = sid in game["double_score_players"]
-            points_earned = points_for_answer(selected_option, correct_option, used_double_score)
+            points_earned = game["answer_points"].get(sid, 0)
             answers.append(
                 {
                     "playerId": sid,
@@ -366,7 +349,7 @@ async def run_game(players):
     await sio.emit("chat_history_cleared", {}, room=game_id)
 
     for sid in list(game["players"]):
-        if not isinstance(players[sid], Bot):
+        if not game["players"][sid].get("is_bot"):
             player_games.pop(sid, None)
             await sio.leave_room(sid, game_id)
     await delete_game_chat(game_id)
@@ -440,8 +423,15 @@ async def answer(sid, data):
     game["answers"][sid] = selected_option
     correct_option = current_question["correct_option"].upper()
     used_double_score = sid in game["double_score_players"]
-    points_earned = points_for_answer(selected_option, correct_option, used_double_score)
+    points_earned = points_for_answer(
+        selected_option,
+        correct_option,
+        used_double_score,
+        remaining_time=remaining_time_for_score(game),
+        total_time=QUESTION_SECONDS,
+    )
     game["players"][sid]["score"] += points_earned
+    game["answer_points"][sid] = points_earned
 
     await emit_sound_to_room(sio, game_id, SOUND_SUBMIT_ANSWER)
     await sio.emit(

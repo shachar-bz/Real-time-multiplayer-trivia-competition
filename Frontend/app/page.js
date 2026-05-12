@@ -16,6 +16,7 @@ const SOUND_EFFECTS = {
   wrong_answer: "/sounds/wrong_answer.mp3",
   win_game: "/sounds/win_game.mp3",
   submit_answer: "/sounds/submit_answer.mp3",
+  click_possible_answer: "/sounds/click_possible_answer.mp3",
 };
 
 
@@ -388,6 +389,7 @@ export default function Home() {
       return;
     }
 
+    playSoundEffect({ name: "click_possible_answer" });
     setSelectedOption(option);
     setLockedAnswer(true);
     socketRef.current?.emit("answer", {
