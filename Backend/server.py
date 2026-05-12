@@ -11,8 +11,16 @@ import socketio
 from aiohttp import web
 from dotenv import load_dotenv
 
+from chat import delete_game_chat, register_chat_handlers
 from friend_agent import call_a_friend
 from helpers import points_for_answer
+from sound_events import (
+    SOUND_SUBMIT_ANSWER,
+    SOUND_WIN_GAME,
+    emit_sound_to_room,
+    emit_sound_to_user,
+    register_sound_routes,
+)
 
 
 HOST = "0.0.0.0"
@@ -44,6 +52,7 @@ matchmaking_task = None
 matchmaking_started_at = None
 games = {}
 player_games = {}
+register_chat_handlers(sio, games)
 
 
 def load_questions(limit):
@@ -122,6 +131,15 @@ def seconds_left_for_game(game):
     return max(0, math.ceil(game["question_deadline"] - time.monotonic()))
 
 
+def all_connected_players_answered(game):
+    connected_player_ids = [
+        sid for sid, player in game["players"].items() if player["connected"]
+    ]
+    return bool(connected_player_ids) and all(
+        sid in game["answers"] for sid in connected_player_ids
+    )
+
+
 async def pause_question_timer(game, caller_sid):
     async with game["timer_lock"]:
         if game["question_timer_paused"]:
@@ -172,6 +190,9 @@ async def resume_question_timer(game):
 
 async def wait_for_question_timer(game):
     while game["timer_remaining_seconds"] > 0:
+        if all_connected_players_answered(game):
+            break
+
         if game["question_timer_paused"]:
             await asyncio.sleep(0.1)
             continue
@@ -309,15 +330,26 @@ async def run_game(players):
         )
         await asyncio.sleep(RESULT_SECONDS)
 
+    final_leaderboard = leaderboard_for(game)
     await sio.emit(
         "game_finished",
-        {"leaderboard": leaderboard_for(game), "questionCount": QUESTIONS_PER_GAME},
+        {"leaderboard": final_leaderboard, "questionCount": QUESTIONS_PER_GAME},
         room=game_id,
     )
+    if final_leaderboard:
+        winning_score = final_leaderboard[0]["score"]
+        for player in final_leaderboard:
+            if player["score"] == winning_score:
+                await emit_sound_to_user(sio, player["id"], SOUND_WIN_GAME)
+            else:
+                break
+
+    await sio.emit("chat_history_cleared", {}, room=game_id)
 
     for sid in list(game["players"]):
         player_games.pop(sid, None)
         await sio.leave_room(sid, game_id)
+    await delete_game_chat(game_id)
     games.pop(game_id, None)
 
 
@@ -391,6 +423,7 @@ async def answer(sid, data):
     points_earned = points_for_answer(selected_option, correct_option, used_double_score)
     game["players"][sid]["score"] += points_earned
 
+    await emit_sound_to_room(sio, game_id, SOUND_SUBMIT_ANSWER)
     await sio.emit(
         "answer_received",
         {"questionId": question_id, "selectedOption": selected_option},
@@ -508,6 +541,7 @@ async def health(request):
 
 
 app.router.add_get("/", health)
+register_sound_routes(app)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { io } from "socket.io-client";
 
 
@@ -11,10 +11,19 @@ const DEFAULT_QUESTIONS_PER_GAME = 10;
 const HELP_FIFTY_FIFTY = "fifty_fifty";
 const HELP_DOUBLE_SCORE = "double_score";
 const HELP_CALL_A_FRIEND = "call_a_friend";
+const SOUND_EFFECTS = {
+  correct_answer: "/sounds/correct_answer.mp3",
+  wrong_answer: "/sounds/wrong_answer.mp3",
+  win_game: "/sounds/win_game.mp3",
+  submit_answer: "/sounds/submit_answer.mp3",
+};
 
 
 export default function Home() {
   const socketRef = useRef(null);
+  const soundRefs = useRef({});
+  const chatListRef = useRef(null);
+  const chatOpenRef = useRef(false);
   const [phase, setPhase] = useState("intro");
   const [connectionStatus, setConnectionStatus] = useState("Disconnected");
   const [playerName, setPlayerName] = useState("");
@@ -52,8 +61,87 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
+
+  const scrollChatToBottom = useCallback(() => {
+    window.requestAnimationFrame(() => {
+      if (chatListRef.current) {
+        chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
+      }
+    });
+  }, []);
 
   useEffect(() => {
+    chatOpenRef.current = chatOpen;
+  }, [chatOpen]);
+
+  const ensureSoundAudio = useCallback((name, soundUrl = SOUND_EFFECTS[name]) => {
+    if (!soundUrl) {
+      return null;
+    }
+
+    const absoluteUrl = new URL(soundUrl, SERVER_URL).toString();
+    let audio = soundRefs.current[name];
+    if (!audio || audio.src !== absoluteUrl) {
+      audio = new Audio(absoluteUrl);
+      audio.preload = "auto";
+      soundRefs.current[name] = audio;
+    }
+
+    return audio;
+  }, []);
+
+  const playSoundEffect = useCallback(
+    (sound) => {
+      const name = sound?.name;
+      if (!name) {
+        return;
+      }
+
+      const audio = ensureSoundAudio(name, sound.url || SOUND_EFFECTS[name]);
+      if (!audio) {
+        return;
+      }
+
+      const playback = audio.cloneNode();
+      playback.currentTime = 0;
+      playback.play().catch(() => {});
+    },
+    [ensureSoundAudio]
+  );
+
+  const primeSoundEffects = useCallback(() => {
+    Object.keys(SOUND_EFFECTS).forEach((name) => {
+      const audio = ensureSoundAudio(name);
+      if (!audio) {
+        return;
+      }
+
+      audio.muted = true;
+      const resetAudio = () => {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.muted = false;
+      };
+      const playPromise = audio.play();
+      if (playPromise) {
+        playPromise.then(resetAudio).catch(() => {
+          audio.muted = false;
+        });
+      } else {
+        resetAudio();
+      }
+    });
+  }, [ensureSoundAudio]);
+
+  useEffect(() => {
+    Object.keys(SOUND_EFFECTS).forEach((name) => {
+      ensureSoundAudio(name);
+    });
+
     const socket = io(SERVER_URL, {
       autoConnect: true,
       transports: ["websocket", "polling"],
@@ -79,6 +167,10 @@ export default function Home() {
       setLeaderboard([]);
       setResult(null);
       setErrorMessage("");
+      setChatOpen(false);
+      setChatMessages([]);
+      setChatInput("");
+      setChatUnreadCount(0);
       setHelps({
         fiftyFifty: true,
         doubleScore: true,
@@ -119,12 +211,42 @@ export default function Home() {
       setSelectedOption(answer.selectedOption);
       setLockedAnswer(true);
     });
+    socket.on("sound_effect", playSoundEffect);
+    socket.on("chat_new_message", (message) => {
+      const normalizedMessage = {
+        ...message,
+        is_own: message.is_own ?? message.user_id === socket.id,
+      };
+      setChatMessages((currentMessages) => [...currentMessages, normalizedMessage]);
+      if (chatOpenRef.current) {
+        scrollChatToBottom();
+      }
+    });
+    socket.on("chat_history", (messages) => {
+      setChatMessages(messages);
+      scrollChatToBottom();
+    });
+    socket.on("chat_unread_update", (update) => {
+      setChatUnreadCount(update.unread_count || 0);
+    });
+    socket.on("chat_history_cleared", () => {
+      setChatMessages([]);
+      setChatUnreadCount(0);
+    });
     socket.on("question_result", (questionResult) => {
       setPhase("result");
       setResult(questionResult);
       setLeaderboard(questionResult.leaderboard);
       setQuestionEndsAt(null);
       setTimeLeft(0);
+      const currentPlayerResult = questionResult.answers.find(
+        (answer) => answer.playerId === socket.id
+      );
+      if (currentPlayerResult?.selectedOption) {
+        playSoundEffect({
+          name: currentPlayerResult.isCorrect ? "correct_answer" : "wrong_answer",
+        });
+      }
     });
     socket.on("help_used", (helpResult) => {
       setHelps(helpResult.helps);
@@ -194,6 +316,10 @@ export default function Home() {
       setResult(null);
       setGameInfo(null);
       setQuestionEndsAt(null);
+      setChatOpen(false);
+      setChatMessages([]);
+      setChatInput("");
+      setChatUnreadCount(0);
       setFriendPopup({
         open: false,
         loading: false,
@@ -222,7 +348,7 @@ export default function Home() {
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [ensureSoundAudio, playSoundEffect, scrollChatToBottom]);
 
   useEffect(() => {
     if (!questionEndsAt) {
@@ -246,6 +372,7 @@ export default function Home() {
 
   function joinQueue(event) {
     event.preventDefault();
+    primeSoundEffects();
     setErrorMessage("");
     setPhase("waiting");
     setWaiting({
@@ -289,6 +416,37 @@ export default function Home() {
       questionId: question.id,
       helpType,
     });
+  }
+
+  function openChat() {
+    if (!gameInfo?.gameId) {
+      return;
+    }
+
+    setChatOpen(true);
+    setChatUnreadCount(0);
+    socketRef.current?.emit("chat_request_history", { game_id: gameInfo.gameId });
+    socketRef.current?.emit("chat_open", { game_id: gameInfo.gameId });
+    scrollChatToBottom();
+  }
+
+  function closeChat() {
+    setChatOpen(false);
+  }
+
+  function sendChatMessage(event) {
+    event.preventDefault();
+    const content = chatInput.trim();
+
+    if (!content || !gameInfo?.gameId) {
+      return;
+    }
+
+    socketRef.current?.emit("chat_send_message", {
+      game_id: gameInfo.gameId,
+      content,
+    });
+    setChatInput("");
   }
 
   return (
@@ -471,6 +629,48 @@ export default function Home() {
       {gameInfo && phase !== "finished" && (
         <aside className="gameInfo">
           Players: {gameInfo.players.join(", ")}
+        </aside>
+      )}
+
+      {gameInfo && phase !== "finished" && (
+        <aside className={chatOpen ? "chatPanel open" : "chatPanel closed"} aria-label="Game chat">
+          {chatOpen ? (
+            <>
+              <div className="chatHeader">
+                <strong>Chat</strong>
+                <button className="chatClose" onClick={closeChat} type="button" aria-label="Close chat">
+                  x
+                </button>
+              </div>
+              <div className="chatMessages" ref={chatListRef}>
+                {chatMessages.map((message) => (
+                  <article
+                    className={message.is_own ? "chatMessage own" : "chatMessage"}
+                    key={message.id}
+                  >
+                    <span className="chatUsername">{message.username}</span>
+                    <p>{message.content}</p>
+                    <time>{message.timestamp}</time>
+                  </article>
+                ))}
+              </div>
+              <form className="chatForm" onSubmit={sendChatMessage}>
+                <input
+                  aria-label="Chat message"
+                  maxLength={240}
+                  onChange={(event) => setChatInput(event.target.value)}
+                  placeholder="Type a message"
+                  value={chatInput}
+                />
+                <button type="submit">Send</button>
+              </form>
+            </>
+          ) : (
+            <button className="chatToggle" onClick={openChat} type="button">
+              Chat
+              {chatUnreadCount > 0 && <span className="chatBadge">{chatUnreadCount}</span>}
+            </button>
+          )}
         </aside>
       )}
     </main>
