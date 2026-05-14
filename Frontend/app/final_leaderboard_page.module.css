@@ -1,0 +1,579 @@
+.finalLeaderboard {
+  --final-background: #11131c;
+  --final-surface: #1d1f29;
+  --final-surface-high: #282933;
+  --final-surface-highest: #32343e;
+  --final-ink: #e1e1ef;
+  --final-muted: #eabcb3;
+  --final-outline: #b0877f;
+  --final-outline-dark: #5f3f38;
+  --final-red: #ff5539;
+  --final-red-text: #590600;
+  --final-blue: #00d2fd;
+  --final-blue-soft: #a2e7ff;
+  --final-gold: #e9c400;
+  --final-gold-dark: #c9a900;
+  --final-gold-text: #4c3f00;
+  --final-shadow: #000000;
+
+  align-items: center;
+  background: var(--final-background);
+  color: var(--final-ink);
+  display: flex;
+  font-family: Lexend, "Segoe UI", Arial, Helvetica, sans-serif;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+  padding: 44px 24px;
+  position: relative;
+  width: 100%;
+}
+
+.speedLines {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0,
+    transparent 14px,
+    rgba(255, 180, 166, 0.52) 14px,
+    rgba(255, 180, 166, 0.52) 16px
+  );
+  inset: 0;
+  opacity: 0.11;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.boardContent {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  max-width: 1120px;
+  position: relative;
+  width: 100%;
+  z-index: 1;
+}
+
+.podium {
+  align-items: flex-end;
+  display: flex;
+  gap: 54px;
+  justify-content: center;
+  min-height: 392px;
+  width: 100%;
+}
+
+.podiumCard {
+  --podium-accent: var(--final-muted);
+  --podium-glow: rgba(255, 180, 166, 0.58);
+  --podium-block: var(--final-surface-highest);
+  --podium-block-text: var(--final-ink);
+  --podium-avatar-size: 96px;
+  --podium-block-width: 132px;
+  --podium-block-height: 150px;
+
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 210px;
+}
+
+.podiumFirst {
+  --podium-accent: var(--final-gold);
+  --podium-glow: rgba(233, 196, 0, 0.62);
+  --podium-block: var(--final-gold-dark);
+  --podium-block-text: var(--final-gold-text);
+  --podium-avatar-size: 132px;
+  --podium-block-width: 164px;
+  --podium-block-height: 224px;
+
+  z-index: 3;
+}
+
+.podiumSecond {
+  --podium-accent: var(--final-blue);
+  --podium-glow: rgba(0, 210, 253, 0.58);
+
+  z-index: 2;
+}
+
+.podiumThird {
+  --podium-accent: var(--final-muted);
+  --podium-glow: rgba(255, 180, 166, 0.58);
+  --podium-block-height: 128px;
+
+  z-index: 1;
+}
+
+.podiumAvatar {
+  background: var(--final-surface-high);
+  border: 5px solid var(--podium-accent);
+  border-radius: 50%;
+  box-shadow:
+    4px 4px 0 var(--final-shadow),
+    0 0 20px var(--podium-glow);
+  display: block;
+  height: var(--podium-avatar-size);
+  margin-bottom: 16px;
+  overflow: hidden;
+  width: var(--podium-avatar-size);
+}
+
+.podiumAvatar img {
+  display: block;
+  filter: saturate(1.12) contrast(1.08);
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.podiumCard h2 {
+  color: var(--podium-accent);
+  font-family: Anybody, "Arial Black", Impact, sans-serif;
+  font-size: 1.55rem;
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.05;
+  margin: 0 0 12px;
+  max-width: 260px;
+  overflow-wrap: anywhere;
+  text-align: center;
+  text-shadow: 3px 3px 0 var(--final-shadow);
+}
+
+.podiumFirst h2 {
+  font-size: 2rem;
+}
+
+.podiumBlock {
+  align-items: center;
+  background: var(--podium-block);
+  border: 5px solid color-mix(in srgb, var(--podium-accent), #000 38%);
+  border-radius: 8px 8px 0 0;
+  box-shadow: 8px 8px 0 var(--final-shadow);
+  color: var(--podium-block-text);
+  display: flex;
+  flex-direction: column;
+  height: var(--podium-block-height);
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  width: var(--podium-block-width);
+}
+
+.blockGlow {
+  background: linear-gradient(180deg, var(--podium-glow), transparent 58%);
+  inset: 0;
+  opacity: 0.35;
+  pointer-events: none;
+  position: absolute;
+}
+
+.podiumBlock strong {
+  font-family: Anybody, "Arial Black", Impact, sans-serif;
+  font-size: 1.7rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  position: relative;
+  text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.08);
+  z-index: 1;
+}
+
+.podiumFirst .podiumBlock strong {
+  font-size: 2.4rem;
+}
+
+.pointsLabel {
+  color: currentColor;
+  font-size: 0.9rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  margin-top: 6px;
+  opacity: 0.84;
+  position: relative;
+  text-transform: uppercase;
+  z-index: 1;
+}
+
+.standingsCard {
+  background: var(--final-surface-high);
+  border: 4px solid var(--final-muted);
+  border-radius: 8px;
+  box-shadow: 8px 8px 0 var(--final-shadow);
+  display: flex;
+  flex-direction: column;
+  max-width: 900px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.standingsHeader,
+.standingsRow {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) 156px;
+}
+
+.standingsHeader {
+  align-items: center;
+  background: var(--final-surface-highest);
+  border-bottom: 3px solid var(--final-muted);
+  color: var(--final-muted);
+  font-size: 0.9rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  min-height: 56px;
+  padding: 0 28px;
+  text-transform: uppercase;
+}
+
+.standingsHeader span:last-child {
+  text-align: right;
+}
+
+.standingsRows {
+  list-style: none;
+  margin: 0;
+  overflow: visible;
+  padding: 0;
+}
+
+.standingsRowsScrollable {
+  max-height: 248px;
+  overflow-y: auto;
+  scrollbar-color: var(--final-muted) var(--final-surface);
+  scrollbar-width: thin;
+}
+
+.standingsRowsScrollable::-webkit-scrollbar {
+  width: 10px;
+}
+
+.standingsRowsScrollable::-webkit-scrollbar-track {
+  background: var(--final-surface);
+}
+
+.standingsRowsScrollable::-webkit-scrollbar-thumb {
+  background: var(--final-muted);
+  border: 2px solid var(--final-surface);
+}
+
+.standingsRow {
+  align-items: center;
+  background: rgba(17, 19, 28, 0.38);
+  border-bottom: 2px solid rgba(50, 52, 62, 0.86);
+  min-height: 82px;
+  padding: 0 28px;
+}
+
+.standingsRow:nth-child(even) {
+  background: rgba(29, 31, 41, 0.72);
+}
+
+.standingsRow:last-child {
+  border-bottom: 0;
+}
+
+.standingsRow:hover {
+  background: var(--final-surface-highest);
+}
+
+.rowRank,
+.standingsRow strong {
+  font-family: Anybody, "Arial Black", Impact, sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.rowRank {
+  color: var(--final-ink);
+  text-shadow: 2px 2px 0 var(--final-shadow);
+}
+
+.rowRacer {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  min-width: 0;
+}
+
+.racerGlyph {
+  align-items: center;
+  border: 2px solid var(--final-outline);
+  border-radius: 50%;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 42px;
+  justify-content: center;
+  position: relative;
+  width: 42px;
+}
+
+.racerGlyph::before {
+  border: 2px solid var(--final-outline);
+  border-radius: 50%;
+  content: "";
+  height: 8px;
+  left: 50%;
+  position: absolute;
+  top: 9px;
+  transform: translateX(-50%);
+  width: 8px;
+}
+
+.racerGlyph::after {
+  border: 2px solid var(--final-outline);
+  border-radius: 9px 9px 3px 3px;
+  bottom: 9px;
+  content: "";
+  height: 10px;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+  width: 20px;
+}
+
+.racerName {
+  color: var(--final-ink);
+  font-size: 1.28rem;
+  font-weight: 700;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.racerName em {
+  color: var(--final-muted);
+  font-size: 0.8rem;
+  font-style: normal;
+  font-weight: 900;
+  margin-left: 10px;
+  text-transform: uppercase;
+}
+
+.standingsRow strong {
+  color: var(--final-muted);
+  text-align: right;
+  text-shadow: 2px 2px 0 var(--final-shadow);
+}
+
+.emptyRow {
+  color: rgba(225, 225, 239, 0.72);
+}
+
+.emptyRow .rowRacer {
+  font-weight: 800;
+}
+
+.backButton {
+  align-items: center;
+  background: var(--final-red);
+  border: 4px solid var(--final-red-text);
+  border-radius: 0;
+  box-shadow: 8px 8px 0 var(--final-shadow);
+  color: var(--final-red-text);
+  display: inline-flex;
+  font-family: Anybody, "Arial Black", Impact, sans-serif;
+  font-size: 1.3rem;
+  font-style: italic;
+  font-weight: 900;
+  gap: 14px;
+  justify-content: center;
+  letter-spacing: 0.02em;
+  min-height: 82px;
+  min-width: 348px;
+  padding: 0 40px;
+  text-transform: uppercase;
+  transition: box-shadow 140ms ease, transform 140ms ease;
+}
+
+.backButton:hover:not(:disabled) {
+  box-shadow: 4px 4px 0 var(--final-shadow);
+  transform: translate(4px, 4px);
+}
+
+.backButton:active:not(:disabled) {
+  box-shadow: none;
+  transform: translate(8px, 8px);
+}
+
+.flagIcon {
+  border-left: 3px solid currentColor;
+  display: inline-block;
+  height: 24px;
+  position: relative;
+  width: 21px;
+}
+
+.flagIcon::after {
+  background-image: repeating-conic-gradient(
+    currentColor 0 25%,
+    transparent 0 50%
+  );
+  background-size: 8px 8px;
+  content: "";
+  height: 14px;
+  left: 3px;
+  position: absolute;
+  top: 2px;
+  width: 16px;
+}
+
+@media (max-width: 900px) {
+  .finalLeaderboard {
+    align-items: flex-start;
+    overflow-y: auto;
+    padding: 28px 16px 40px;
+  }
+
+  .boardContent {
+    gap: 28px;
+  }
+
+  .podium {
+    gap: 18px;
+    min-height: 338px;
+  }
+
+  .podiumCard {
+    --podium-avatar-size: 76px;
+    --podium-block-width: 108px;
+    --podium-block-height: 126px;
+
+    width: 31%;
+  }
+
+  .podiumFirst {
+    --podium-avatar-size: 104px;
+    --podium-block-width: 132px;
+    --podium-block-height: 178px;
+  }
+
+  .podiumThird {
+    --podium-block-height: 108px;
+  }
+
+  .podiumCard h2 {
+    font-size: 1.05rem;
+    max-width: 150px;
+  }
+
+  .podiumFirst h2 {
+    font-size: 1.35rem;
+  }
+
+  .podiumBlock strong {
+    font-size: 1.25rem;
+  }
+
+  .podiumFirst .podiumBlock strong {
+    font-size: 1.75rem;
+  }
+
+  .standingsHeader,
+  .standingsRow {
+    grid-template-columns: 58px minmax(0, 1fr) 96px;
+  }
+
+  .standingsHeader {
+    font-size: 0.72rem;
+    min-height: 48px;
+    padding: 0 14px;
+  }
+
+  .standingsRow {
+    min-height: 72px;
+    padding: 0 14px;
+  }
+
+  .racerGlyph {
+    height: 36px;
+    width: 36px;
+  }
+
+  .racerName {
+    font-size: 1rem;
+  }
+
+  .rowRank,
+  .standingsRow strong {
+    font-size: 1.12rem;
+  }
+
+  .backButton {
+    font-size: 1.05rem;
+    min-height: 70px;
+    min-width: min(100%, 318px);
+    padding: 0 28px;
+  }
+}
+
+@media (max-width: 560px) {
+  .podium {
+    align-items: center;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .podiumCard {
+    --podium-avatar-size: 82px;
+    --podium-block-width: min(250px, 70vw);
+    --podium-block-height: 108px;
+
+    width: 100%;
+  }
+
+  .podiumFirst {
+    --podium-avatar-size: 104px;
+    --podium-block-width: min(280px, 76vw);
+    --podium-block-height: 142px;
+
+    order: -1;
+  }
+
+  .podiumBlock {
+    border-radius: 8px;
+  }
+
+  .standingsHeader,
+  .standingsRow {
+    grid-template-columns: 44px minmax(0, 1fr) 78px;
+  }
+
+  .standingsRowsScrollable {
+    max-height: 220px;
+  }
+
+  .standingsHeader {
+    padding: 0 10px;
+  }
+
+  .standingsRow {
+    min-height: 66px;
+    padding: 0 10px;
+  }
+
+  .rowRacer {
+    gap: 8px;
+  }
+
+  .racerGlyph {
+    display: none;
+  }
+
+  .racerName em {
+    display: block;
+    margin: 3px 0 0;
+  }
+
+  .backButton {
+    width: 100%;
+  }
+}

@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
+import GamePage from "./game_page";
 import MatchmakingPage from "./matchmaking_page";
 import WelcomePage from "./welcome_page";
 
@@ -35,6 +36,7 @@ export default function Home() {
   const soundRefs = useRef({});
   const activeSoundRefs = useRef({});
   const gameCountdownPlayedRef = useRef(false);
+  const settledRaceStandingsRef = useRef(EMPTY_RACE_STANDINGS);
   const chatListRef = useRef(null);
   const chatOpenRef = useRef(false);
   const [phase, setPhase] = useState("intro");
@@ -76,6 +78,7 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
   const [raceStandings, setRaceStandings] = useState(EMPTY_RACE_STANDINGS);
+  const [previousRaceStandings, setPreviousRaceStandings] = useState(EMPTY_RACE_STANDINGS);
   const [errorMessage, setErrorMessage] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
@@ -220,12 +223,16 @@ export default function Home() {
       }
     });
     socket.on("game_started", (info) => {
+      const startingRaceStandings = info.raceStandings || EMPTY_RACE_STANDINGS;
+
       stopManagedSound("call_friend");
       stopManagedSound("ticking_clock");
       setPhase("game");
       setGameInfo(info);
       setLeaderboard([]);
-      setRaceStandings(info.raceStandings || EMPTY_RACE_STANDINGS);
+      setRaceStandings(startingRaceStandings);
+      setPreviousRaceStandings(startingRaceStandings);
+      settledRaceStandingsRef.current = startingRaceStandings;
       setResult(null);
       setErrorMessage("");
       setChatOpen(false);
@@ -299,11 +306,15 @@ export default function Home() {
       setRaceStandings(standings || EMPTY_RACE_STANDINGS);
     });
     socket.on("question_result", (questionResult) => {
+      const nextRaceStandings = questionResult.raceStandings || EMPTY_RACE_STANDINGS;
+
       stopManagedSound("ticking_clock");
       setPhase("result");
       setResult(questionResult);
       setLeaderboard(questionResult.leaderboard);
-      setRaceStandings(questionResult.raceStandings || EMPTY_RACE_STANDINGS);
+      setPreviousRaceStandings(settledRaceStandingsRef.current);
+      setRaceStandings(nextRaceStandings);
+      settledRaceStandingsRef.current = nextRaceStandings;
       setQuestionEndsAt(null);
       setTimeLeft(0);
       const currentPlayerResult = questionResult.answers.find(
@@ -381,11 +392,15 @@ export default function Home() {
       });
     });
     socket.on("game_finished", (summary) => {
+      const finalRaceStandings = summary.raceStandings || EMPTY_RACE_STANDINGS;
+
       stopManagedSound("call_friend");
       stopManagedSound("ticking_clock");
       setPhase("finished");
       setLeaderboard(summary.leaderboard);
-      setRaceStandings(summary.raceStandings || EMPTY_RACE_STANDINGS);
+      setPreviousRaceStandings(settledRaceStandingsRef.current);
+      setRaceStandings(finalRaceStandings);
+      settledRaceStandingsRef.current = finalRaceStandings;
       setQuestion(null);
       setResult(null);
       setGameInfo(null);
@@ -454,14 +469,6 @@ export default function Home() {
     playManagedSound("ticking_clock", { loop: true });
     return () => stopManagedSound("ticking_clock");
   }, [phase, questionEndsAt, playManagedSound, stopManagedSound]);
-
-  const myResult = useMemo(() => {
-    if (!result || !socketRef.current) {
-      return null;
-    }
-
-    return result.answers.find((answer) => answer.playerId === socketRef.current.id);
-  }, [result]);
 
   function joinQueue(event, profile = {}) {
     event.preventDefault();
@@ -573,9 +580,6 @@ export default function Home() {
     raceStandings?.players?.length > 0
       ? raceStandings
       : gameInfo?.raceStandings || EMPTY_RACE_STANDINGS;
-  const showRaceTrack =
-    (phase === "game" || phase === "result" || phase === "finished") &&
-    activeRaceStandings.players.length > 0;
 
   if (phase === "intro") {
     return (
@@ -601,293 +605,52 @@ export default function Home() {
   }
 
   return (
-    <main className="gameShell">
-      <div className="gameBackdrop" aria-hidden="true" />
-
-      <section className="gameTopbar" aria-label="Game status">
-        <div className="roundBadge">
-          {phase === "finished"
-            ? "Final lap"
-            : `Round ${question?.index || 1}/${question?.total || config.questionsPerGame}`}
-        </div>
-        <span className={connectionStatus === "Connected" ? "status online" : "status"}>
-          {connectionStatus}
-        </span>
-      </section>
-
-      {phase === "game" && question && (
-        <section className="panel questionPanel">
-          <div className="questionMeta">
-            <span>
-              Question {question.index}/{question.total}
-            </span>
-            <span>{timeLeft}</span>
-          </div>
-          <p className="topic">
-            {question.topic} · Difficulty {question.difficulty}
-          </p>
-          <h2>{question.text}</h2>
-          <div className="helps" aria-label="Question helps">
-            <button
-              className="helpButton"
-              disabled={!helps.fiftyFifty || lockedAnswer || removedOptions.length > 0}
-              onClick={() => useHelp(HELP_FIFTY_FIFTY)}
-              type="button"
-            >
-              50/50
-            </button>
-            <button
-              className={doubleScoreActive ? "helpButton active" : "helpButton"}
-              disabled={!helps.doubleScore || lockedAnswer || doubleScoreActive}
-              onClick={() => useHelp(HELP_DOUBLE_SCORE)}
-              type="button"
-            >
-              Double score
-            </button>
-            <button
-              className="helpButton"
-              disabled={!helps.callFriend || lockedAnswer || friendPopup.loading}
-              onClick={() => useHelp(HELP_CALL_A_FRIEND)}
-              type="button"
-            >
-              Call a friend
-            </button>
-          </div>
-          {doubleScoreActive && (
-            <p className="muted">Double score is active for this question.</p>
-          )}
-          <div className="options">
-            {question.options.map((option) => (
-              <button
-                className={[
-                  "option",
-                  selectedOption === option.key ? "selected" : "",
-                  removedOptions.includes(option.key) ? "removed" : "",
-                ].join(" ")}
-                disabled={lockedAnswer || removedOptions.includes(option.key)}
-                key={option.key}
-                onClick={() => chooseAnswer(option.key)}
-                type="button"
-              >
-                <strong>{option.key}</strong>
-                <span>{option.text}</span>
-              </button>
-            ))}
-          </div>
-          {lockedAnswer && <p className="muted">Answer locked. Waiting for the timer.</p>}
-        </section>
-      )}
-
-      {phase === "result" && result && (
-        <section className="panel">
-          <p className="eyebrow">Answer</p>
-          <h2>
-            Correct answer: {result.correctOption}. {result.correctAnswer}
-          </h2>
-          {myResult && (
-            <p className={myResult.isCorrect ? "feedback good" : "feedback bad"}>
-              {myResult.isCorrect
-                ? `You got ${myResult.pointsEarned} point${myResult.pointsEarned === 1 ? "" : "s"}.`
-                : "No point this round."}
-            </p>
-          )}
-          <Leaderboard leaderboard={leaderboard} />
-        </section>
-      )}
-
-      {phase === "finished" && (
-        <section className="panel">
-          <p className="eyebrow">Final leaderboard</p>
-          <h2>Game complete</h2>
-          <Leaderboard leaderboard={leaderboard} />
-          <button
-            className="secondary"
-            onClick={() => {
-              setRaceStandings(EMPTY_RACE_STANDINGS);
-              setPhase("intro");
-            }}
-            type="button"
-          >
-            Play again
-          </button>
-        </section>
-      )}
-
-      {errorMessage && <p className="error">{errorMessage}</p>}
-
-      {friendPopup.open && (
-        <div className="modalBackdrop" role="presentation">
-          <section className="modal" aria-label="Call a friend message">
-            <p className="eyebrow">Call a friend</p>
-            {friendPopup.loading ? (
-              <p className="muted">{friendPopup.message}</p>
-            ) : (
-              <>
-                <p className="friendMessage">{friendPopup.message}</p>
-              </>
-            )}
-            <button
-              className="secondary"
-              disabled={friendPopup.loading}
-              onClick={() =>
-                setFriendPopup({
-                  open: false,
-                  loading: false,
-                  message: "",
-                  confidence: null,
-                  friendAnswered: null,
-                  kind: "",
-                })
-              }
-              type="button"
-            >
-              Close
-            </button>
-          </section>
-        </div>
-      )}
-
-      {gameInfo && phase !== "finished" && (
-        <aside className="gameInfo">
-          Players: {gameInfo.players.join(", ")}
-        </aside>
-      )}
-
-      {gameInfo && phase !== "finished" && (
-        <aside className={chatOpen ? "chatPanel open" : "chatPanel closed"} aria-label="Game chat">
-          {chatOpen ? (
-            <>
-              <div className="chatHeader">
-                <strong>Chat</strong>
-                <button className="chatClose" onClick={closeChat} type="button" aria-label="Close chat">
-                  x
-                </button>
-              </div>
-              <div className="chatMessages" ref={chatListRef}>
-                {chatMessages.map((message) => (
-                  <article
-                    className={message.is_own ? "chatMessage own" : "chatMessage"}
-                    key={message.id}
-                  >
-                    <span className="chatUsername">{message.username}</span>
-                    <p>{message.content}</p>
-                    <time>{message.timestamp}</time>
-                  </article>
-                ))}
-              </div>
-              <form className="chatForm" onSubmit={sendChatMessage}>
-                <input
-                  aria-label="Chat message"
-                  maxLength={240}
-                  onChange={(event) => setChatInput(event.target.value)}
-                  placeholder="Type a message"
-                  value={chatInput}
-                />
-                <button type="submit">Send</button>
-              </form>
-            </>
-          ) : (
-            <button className="chatToggle" onClick={openChat} type="button">
-              Chat
-              {chatUnreadCount > 0 && <span className="chatBadge">{chatUnreadCount}</span>}
-            </button>
-          )}
-        </aside>
-      )}
-
-      {showRaceTrack && (
-        <RaceTrack
-          currentPlayerId={currentPlayerId}
-          standings={activeRaceStandings}
-        />
-      )}
-    </main>
-  );
-}
-
-
-function RaceTrack({ currentPlayerId, standings }) {
-  const players = standings?.players || [];
-
-  if (!players.length) {
-    return null;
-  }
-
-  return (
-    <section className="raceTrack" aria-label="Live race standings">
-      <div className="raceHeader">
-        <h2>Live Race Standings</h2>
-        <div className="finishLabel">
-          <span aria-hidden="true">|&gt;</span>
-          <span>Finish Line</span>
-        </div>
-      </div>
-      <div className="trackLanes" style={{ "--lane-count": players.length }}>
-        <div className="finishLine" aria-hidden="true" />
-        {players.map((player) => (
-          <RaceLane
-            isCurrentPlayer={player.id === currentPlayerId}
-            key={player.id}
-            player={player}
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-
-function RaceLane({ isCurrentPlayer, player }) {
-  const progressRatio = Math.max(0, Math.min(1, Number(player.progressRatio) || 0));
-  const progressPercent = Math.round(progressRatio * 100);
-  const vehicleLeft = `${4 + progressRatio * 88}%`;
-
-  return (
-    <div className={isCurrentPlayer ? "raceLane current" : "raceLane"}>
-      <div
-        className="laneVehicle"
-        style={{
-          "--vehicle-left": vehicleLeft,
-          "--lane-color": player.paintHex || "#00d2fd",
-        }}
-      >
-        <span className="racerName">{isCurrentPlayer ? "YOU" : player.name}</span>
-        <span className="vehicleBadge" title={player.rideLabel || player.ride}>
-          <VehicleIcon ride={player.ride} />
-        </span>
-        <span className="laneScore">{player.score}</span>
-      </div>
-      <span className="laneProgress" style={{ width: `${progressPercent}%` }} />
-    </div>
-  );
-}
-
-
-function VehicleIcon({ ride }) {
-  const rideClass = String(ride || "sports_car").replaceAll("-", "_");
-
-  return (
-    <span className={`vehicleIcon vehicleIcon-${rideClass}`} aria-hidden="true">
-      <span className="vehicleBody" />
-      <span className="vehicleWheel first" />
-      <span className="vehicleWheel second" />
-    </span>
-  );
-}
-
-
-function Leaderboard({ leaderboard }) {
-  return (
-    <ol className="leaderboard">
-      {leaderboard.map((player, index) => (
-        <li key={player.id}>
-          <span>
-            {index + 1}. {player.name}
-            {!player.connected && <em> disconnected</em>}
-          </span>
-          <strong>{player.score}</strong>
-        </li>
-      ))}
-    </ol>
+    <GamePage
+      chatInput={chatInput}
+      chatListRef={chatListRef}
+      chatMessages={chatMessages}
+      chatOpen={chatOpen}
+      chatUnreadCount={chatUnreadCount}
+      config={config}
+      connectionStatus={connectionStatus}
+      currentPlayerId={currentPlayerId}
+      doubleScoreActive={doubleScoreActive}
+      errorMessage={errorMessage}
+      friendPopup={friendPopup}
+      gameInfo={gameInfo}
+      helps={helps}
+      leaderboard={leaderboard}
+      lockedAnswer={lockedAnswer}
+      onChatInputChange={setChatInput}
+      onChooseAnswer={chooseAnswer}
+      onCloseChat={closeChat}
+      onCloseFriendPopup={() =>
+        setFriendPopup({
+          open: false,
+          loading: false,
+          message: "",
+          confidence: null,
+          friendAnswered: null,
+          kind: "",
+        })
+      }
+      onOpenChat={openChat}
+      onPlayAgain={() => {
+        setRaceStandings(EMPTY_RACE_STANDINGS);
+        setPreviousRaceStandings(EMPTY_RACE_STANDINGS);
+        settledRaceStandingsRef.current = EMPTY_RACE_STANDINGS;
+        setPhase("intro");
+      }}
+      onSendChatMessage={sendChatMessage}
+      onUseHelp={useHelp}
+      phase={phase}
+      previousRaceStandings={previousRaceStandings}
+      question={question}
+      raceStandings={activeRaceStandings}
+      removedOptions={removedOptions}
+      result={result}
+      selectedOption={selectedOption}
+      timeLeft={timeLeft}
+    />
   );
 }

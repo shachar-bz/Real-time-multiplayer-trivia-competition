@@ -42,35 +42,32 @@ export default function MatchmakingPage({
   waiting,
 }) {
   const playerProfiles = useMemo(() => profileListFromWaiting(waiting), [waiting]);
-  const secondsLeft = Math.max(0, Number(waiting?.secondsLeft) || 0);
-  const racerCount = Math.max(Number(waiting?.playerCount) || 0, playerProfiles.length);
   const countdownTotal = Math.max(1, Number(matchmakingSeconds) || 30);
-  const elapsedRatio = Math.max(0, Math.min(1, (countdownTotal - secondsLeft) / countdownTotal));
+  const receivedSecondsLeft = Number(waiting?.secondsLeft);
+  const secondsLeft = Number.isFinite(receivedSecondsLeft)
+    ? Math.max(0, receivedSecondsLeft)
+    : countdownTotal;
+  const racerCount = Math.max(Number(waiting?.playerCount) || 0, playerProfiles.length);
+  const remainingRatio = Math.max(0, Math.min(1, secondsLeft / countdownTotal));
   const timerStyle = {
-    "--timer-progress": `${Math.max(8, elapsedRatio * 360)}deg`,
+    "--timer-progress": `${remainingRatio * 360}deg`,
   };
   const slots =
-    playerProfiles.length < TARGET_GRID_SLOTS
-      ? [
+    playerProfiles.length >= TARGET_GRID_SLOTS
+      ? playerProfiles
+      : [
           ...playerProfiles,
-          {
-            id: "searching-slot",
+          ...Array.from({ length: TARGET_GRID_SLOTS - playerProfiles.length }, (_, index) => ({
+            id: `searching-slot-${index}`,
             isPlaceholder: true,
-          },
-        ]
-      : playerProfiles;
+          })),
+        ];
 
   return (
     <main className={styles.matchmakingShell}>
       <header className={styles.brandBar} aria-label="Nitro Trivia">
-        <span className={styles.brandMark} aria-hidden="true" />
         <span className={styles.brandText}>Nitro Trivia</span>
       </header>
-
-      <section className={styles.hero} aria-label="Matchmaking status">
-        <h1>Matchmaking</h1>
-        <p>Waiting for players</p>
-      </section>
 
       <section className={styles.timerSection} aria-label={`${secondsLeft} seconds to start`}>
         <div className={styles.timerGauge} style={timerStyle}>
@@ -106,6 +103,9 @@ export default function MatchmakingPage({
       </section>
 
       <aside className={styles.botNote}>
+        <span className={styles.botIcon} aria-hidden="true">
+          <span />
+        </span>
         <p>
           Not enough players? <strong>Nitro Bots</strong> will join the grid when the timer hits
           zero.
@@ -134,7 +134,7 @@ function RacerSlot({ currentPlayerId, index, profile }) {
       style={{ "--slot-accent": accentColor }}
     >
       <div className={styles.vehicleFrame}>
-        <img src={ride.image} alt={ride.alt} />
+        <img src={ride.image} alt={`${ride.name} selected by ${displayName}`} />
       </div>
       <h3>{displayName}</h3>
     </article>

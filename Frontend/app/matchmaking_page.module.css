@@ -1,87 +1,68 @@
 .matchmakingShell {
   --track: #11131c;
   --track-deep: #0c0e17;
-  --panel: #191b24;
-  --panel-high: #32343e;
+  --panel-low: #191b24;
+  --panel: #1d1f29;
+  --panel-high: #282933;
+  --panel-highest: #32343e;
   --ink: #e1e1ef;
   --muted: #eabcb3;
   --peach: #ffb4a6;
-  --red: #ff5539;
   --cyan: #00d2fd;
+  --cyan-soft: #a2e7ff;
   --yellow: #e9c400;
-  --shadow: #000000;
+  --danger: #ffdad6;
+  --shadow: #05060a;
 
+  align-content: start;
   background:
-    linear-gradient(rgba(225, 225, 239, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(225, 225, 239, 0.035) 1px, transparent 1px),
-    linear-gradient(180deg, var(--track-deep) 0%, var(--track) 50%, #101722 100%);
-  background-size: 8px 8px, 8px 8px, auto;
+    linear-gradient(130deg, rgba(12, 14, 23, 0.98) 0%, rgba(17, 19, 28, 0.96) 52%, rgba(12, 14, 23, 0.98) 100%),
+    linear-gradient(rgba(225, 225, 239, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(225, 225, 239, 0.02) 1px, transparent 1px),
+    var(--track);
+  background-size: auto, 8px 8px, 8px 8px, auto;
   color: var(--ink);
-  align-items: center;
-  column-gap: clamp(24px, 5vw, 72px);
   display: grid;
-  grid-template-areas:
-    "brand brand"
-    "hero hero"
-    "timer grid"
-    "note leave"
-    "error error";
-  grid-template-columns: minmax(240px, 0.92fr) minmax(300px, 1.08fr);
-  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
   font-family: Lexend, "Segoe UI", Arial, sans-serif;
-  height: 100vh;
-  height: 100svh;
+  justify-items: center;
+  min-height: 100vh;
   min-height: 100svh;
-  overflow: hidden;
-  padding: clamp(12px, 2.4svh, 28px) clamp(16px, 4vw, 54px);
+  overflow-x: hidden;
+  padding: 16px clamp(20px, 4vw, 40px) 56px;
   position: relative;
-  row-gap: clamp(10px, 2svh, 20px);
 }
 
 .matchmakingShell::before,
 .matchmakingShell::after {
   content: "";
-  left: 0;
+  left: -10%;
   pointer-events: none;
-  position: absolute;
-  right: 0;
+  position: fixed;
+  right: -10%;
+  transform: skewY(-10deg);
+  z-index: 0;
 }
 
 .matchmakingShell::before {
-  background: linear-gradient(90deg, transparent, rgba(255, 180, 166, 0.18), transparent);
-  height: 1px;
-  top: 322px;
+  border-top: 2px solid rgba(0, 210, 253, 0.12);
+  top: 28%;
 }
 
 .matchmakingShell::after {
-  background: linear-gradient(90deg, transparent, rgba(0, 210, 253, 0.16), transparent);
-  bottom: 230px;
-  height: 1px;
+  border-top: 2px solid rgba(255, 180, 166, 0.12);
+  bottom: 18%;
 }
 
 .brandBar {
   align-items: center;
   display: inline-flex;
-  gap: 12px;
-  grid-area: brand;
   justify-self: start;
-  min-height: clamp(34px, 5svh, 46px);
+  min-height: 36px;
   position: relative;
-  width: fit-content;
   z-index: 1;
 }
 
-.brandMark {
-  background: var(--peach);
-  clip-path: polygon(44% 0, 78% 0, 59% 34%, 86% 34%, 29% 100%, 44% 52%, 18% 52%);
-  display: inline-block;
-  height: clamp(24px, 4svh, 34px);
-  transform: skewX(-8deg);
-  width: clamp(17px, 2.8svh, 24px);
-}
-
 .brandText,
-.hero h1,
 .gridHeader h2,
 .racerCard h3,
 .leaveButton {
@@ -93,51 +74,15 @@
 
 .brandText {
   color: var(--peach);
-  font-size: clamp(1.25rem, 2.4svh, 2rem);
+  font-size: 2rem;
   line-height: 1;
   text-shadow: 3px 3px 0 var(--shadow);
 }
 
-.hero {
-  align-items: center;
-  display: grid;
-  grid-area: hero;
-  justify-items: center;
-  margin: 0 auto;
-  position: relative;
-  text-align: center;
-  z-index: 1;
-}
-
-.hero h1 {
-  color: var(--peach);
-  font-size: clamp(2rem, 6svh, 3.75rem);
-  line-height: 0.95;
-  margin: 0;
-  text-shadow:
-    4px 4px 0 rgba(0, 0, 0, 0.72),
-    0 0 24px rgba(255, 180, 166, 0.42);
-}
-
-.hero p {
-  background: var(--cyan);
-  box-shadow: 5px 5px 0 var(--shadow);
-  color: #004657;
-  font-size: clamp(0.72rem, 1.6svh, 0.95rem);
-  font-weight: 900;
-  letter-spacing: 0.22em;
-  margin: clamp(6px, 1.4svh, 14px) 0 0;
-  min-width: min(100%, 310px);
-  padding: clamp(5px, 1svh, 8px) 28px;
-  text-transform: uppercase;
-}
-
 .timerSection {
-  align-items: center;
   display: grid;
-  grid-area: timer;
   justify-items: center;
-  padding: 0;
+  margin-top: clamp(66px, 9svh, 96px);
   position: relative;
   z-index: 1;
 }
@@ -145,70 +90,68 @@
 .timerGauge {
   align-items: center;
   aspect-ratio: 1;
-  background:
-    conic-gradient(from -90deg, var(--red) 0 180deg, var(--cyan) 180deg 360deg),
-    conic-gradient(from -90deg, var(--cyan) 0 var(--timer-progress), var(--panel-high) 0);
+  background: var(--panel-high);
+  border: 8px solid var(--panel-highest);
   border-radius: 50%;
   box-shadow:
-    10px 10px 0 rgba(0, 0, 0, 0.42),
-    0 0 32px rgba(0, 210, 253, 0.18);
+    0 0 42px rgba(0, 210, 253, 0.24),
+    7px 10px 0 rgba(0, 0, 0, 0.38);
   display: grid;
   justify-items: center;
-  padding: 11px;
-  width: min(100%, clamp(170px, 34svh, 300px));
+  overflow: hidden;
+  position: relative;
+  width: 256px;
 }
 
 .timerGauge::before {
-  background: #22252f;
+  background:
+    conic-gradient(from -5deg, var(--cyan) 0 var(--timer-progress), transparent var(--timer-progress) 360deg);
   border-radius: 50%;
-  box-shadow: inset 0 0 0 8px #0d1018;
   content: "";
-  grid-area: 1 / 1;
-  height: 100%;
-  width: 100%;
+  inset: 10px;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 22px), #000 calc(100% - 21px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 22px), #000 calc(100% - 21px));
+  position: absolute;
 }
 
 .timerFace {
   align-items: center;
-  background:
-    radial-gradient(circle at center, rgba(143, 232, 255, 0.14), transparent 55%),
-    linear-gradient(135deg, #3b4651, #1e242d);
-  border: 5px solid #d7e7ff;
+  background: var(--panel-high);
   border-radius: 50%;
-  box-shadow: inset 0 0 34px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
-  grid-area: 1 / 1;
-  height: calc(100% - clamp(38px, 7svh, 56px));
+  height: 174px;
   justify-content: center;
   position: relative;
-  width: calc(100% - clamp(38px, 7svh, 56px));
+  text-align: center;
+  width: 174px;
+  z-index: 1;
 }
 
 .timerFace strong {
-  color: #a2e7ff;
+  color: var(--cyan-soft);
   font-family: Anybody, "Arial Black", Impact, sans-serif;
-  font-size: clamp(3.3rem, 8svh, 5.2rem);
+  font-size: 3.65rem;
   font-style: italic;
+  font-weight: 900;
   line-height: 0.9;
   text-shadow:
-    4px 4px 0 rgba(0, 0, 0, 0.55),
-    0 0 22px rgba(0, 210, 253, 0.44);
+    3px 3px 0 rgba(0, 0, 0, 0.54),
+    0 0 14px rgba(0, 210, 253, 0.72);
 }
 
 .timerFace span {
-  color: #ffe1dc;
-  font-size: clamp(0.62rem, 1.4svh, 0.85rem);
+  color: #ffd5ce;
+  font-size: 0.92rem;
   font-weight: 900;
-  margin-top: clamp(3px, 0.8svh, 8px);
+  line-height: 1;
+  margin-top: 14px;
   text-transform: uppercase;
 }
 
 .gridSection {
-  grid-area: grid;
-  justify-self: stretch;
-  margin: 0;
-  max-width: none;
+  margin-top: clamp(58px, 8svh, 86px);
+  max-width: 910px;
   position: relative;
   width: 100%;
   z-index: 1;
@@ -216,68 +159,87 @@
 
 .gridHeader {
   align-items: end;
+  border-bottom: 2px solid rgba(225, 225, 239, 0.17);
   display: flex;
   gap: 18px;
   justify-content: space-between;
-  margin: 0 4px clamp(8px, 1.5svh, 14px);
+  padding-bottom: 8px;
 }
 
 .gridHeader h2 {
-  color: var(--ink);
-  font-size: clamp(1.05rem, 2.3svh, 1.45rem);
+  color: var(--peach);
+  font-size: 1.55rem;
   line-height: 1;
   margin: 0;
-  text-shadow: 3px 3px 0 var(--shadow);
+  text-shadow: 2px 2px 0 var(--shadow);
 }
 
 .gridHeader span {
   color: var(--yellow);
-  font-size: clamp(0.72rem, 1.6svh, 0.95rem);
+  font-size: 0.98rem;
   font-weight: 900;
-  letter-spacing: 0.08em;
-  text-shadow: 2px 2px 0 var(--shadow);
+  line-height: 1;
   text-transform: uppercase;
 }
 
 .gridList {
   display: grid;
-  gap: clamp(8px, 1.6svh, 14px);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 24px;
 }
 
 .racerCard,
 .searchingCard {
   align-items: center;
-  background: #1b1e28;
-  border: 3px solid #dfe4f3;
-  box-shadow: 5px 5px 0 var(--shadow);
+  aspect-ratio: 1.3 / 1;
+  background: var(--panel);
+  border: 2px solid var(--panel-highest);
+  border-radius: 8px;
+  box-shadow: 4px 4px 0 var(--shadow);
   display: grid;
-  gap: clamp(5px, 1svh, 8px);
-  height: clamp(82px, 14svh, 126px);
+  gap: 14px;
+  grid-template-rows: minmax(0, 1fr) auto;
   justify-items: center;
-  max-width: none;
   min-width: 0;
-  padding: clamp(8px, 1.5svh, 12px);
+  overflow: hidden;
+  padding: 22px 18px 20px;
+  position: relative;
 }
 
 .racerCard {
-  border-color: color-mix(in srgb, var(--slot-accent), #ffffff 68%);
+  border-color: color-mix(in srgb, var(--slot-accent), var(--panel-highest) 58%);
 }
 
 .racerCardCurrent {
-  background: var(--red);
-  border-color: #ffe1dc;
+  border-color: var(--peach);
+  box-shadow:
+    4px 4px 0 var(--peach),
+    7px 7px 0 var(--shadow);
+}
+
+.racerCardCurrent::after {
+  background: var(--peach);
+  content: "";
+  height: 52px;
+  position: absolute;
+  right: -28px;
+  top: -28px;
+  transform: rotate(45deg);
+  width: 52px;
 }
 
 .vehicleFrame {
+  align-self: end;
   aspect-ratio: 1;
   background:
-    linear-gradient(135deg, rgba(0, 210, 253, 0.16), transparent 50%),
+    linear-gradient(135deg, rgba(0, 210, 253, 0.14), transparent 54%),
     var(--track-deep);
-  border: 3px solid #f4f6ff;
-  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.42);
+  border: 4px solid var(--panel-high);
+  border-radius: 50%;
+  display: grid;
   overflow: hidden;
-  width: clamp(44px, 7.8svh, 66px);
+  width: 96px;
 }
 
 .vehicleFrame img {
@@ -290,381 +252,377 @@
 
 .racerCard h3 {
   color: var(--ink);
-  font-size: clamp(0.75rem, 1.6svh, 0.95rem);
+  font-size: 1.4rem;
   line-height: 1;
   margin: 0;
   max-width: 100%;
-  overflow-wrap: anywhere;
+  overflow: hidden;
   text-align: center;
+  text-overflow: ellipsis;
   text-shadow: 2px 2px 0 var(--shadow);
+  white-space: nowrap;
 }
 
-.racerCardCurrent h3 {
-  color: #2b0703;
-  text-shadow: none;
+.racerCard:not(.racerCardCurrent) h3 {
+  color: #ffd5ce;
 }
 
 .searchingCard {
   background: rgba(25, 27, 36, 0.52);
-  border: 3px dashed rgba(234, 188, 179, 0.34);
+  border-color: rgba(50, 52, 62, 0.78);
+  border-style: dashed;
   box-shadow: none;
-  color: rgba(234, 188, 179, 0.78);
+  color: rgba(225, 225, 239, 0.14);
+  justify-content: center;
 }
 
 .searchingCard span {
   align-items: center;
-  border: 3px solid currentColor;
+  border: 4px dashed currentColor;
   border-radius: 50%;
   display: inline-flex;
-  font-size: clamp(1rem, 2.2svh, 1.25rem);
-  font-weight: 900;
-  height: clamp(24px, 4svh, 30px);
+  font-size: 3.2rem;
+  font-weight: 300;
+  height: 96px;
   justify-content: center;
   line-height: 1;
-  width: clamp(24px, 4svh, 30px);
+  width: 96px;
 }
 
 .searchingCard p {
-  font-size: clamp(0.58rem, 1.3svh, 0.72rem);
+  color: rgba(225, 225, 239, 0.12);
+  font-size: 0.98rem;
   font-weight: 900;
-  letter-spacing: 0.03em;
+  line-height: 1;
   margin: 0;
   text-transform: uppercase;
 }
 
 .botNote {
-  background: var(--panel);
-  border-left: 6px solid var(--yellow);
-  box-shadow: 6px 6px 0 var(--shadow);
-  grid-area: note;
-  justify-self: end;
-  margin: 0;
-  max-width: 520px;
-  padding: clamp(12px, 2svh, 20px) clamp(16px, 2.8svh, 26px);
+  align-items: center;
+  background: var(--panel-highest);
+  border-left: 4px solid var(--cyan-soft);
+  border-radius: 0 8px 8px 0;
+  box-shadow: 4px 4px 0 var(--shadow);
+  display: flex;
+  gap: 14px;
+  margin-top: clamp(76px, 11svh, 116px);
+  max-width: 680px;
+  padding: 14px 18px;
   position: relative;
-  width: min(100%, 520px);
+  width: min(100%, 680px);
   z-index: 1;
 }
 
+.botIcon {
+  border: 2px solid var(--cyan-soft);
+  border-radius: 5px;
+  color: var(--cyan-soft);
+  display: inline-block;
+  flex: 0 0 auto;
+  height: 20px;
+  position: relative;
+  width: 22px;
+}
+
+.botIcon::before {
+  background: currentColor;
+  content: "";
+  height: 5px;
+  left: 50%;
+  position: absolute;
+  top: -7px;
+  transform: translateX(-50%);
+  width: 2px;
+}
+
+.botIcon::after {
+  background: currentColor;
+  box-shadow: 8px 0 0 currentColor;
+  content: "";
+  height: 4px;
+  left: 5px;
+  position: absolute;
+  top: 6px;
+  width: 4px;
+}
+
+.botIcon span {
+  background: currentColor;
+  bottom: 3px;
+  height: 2px;
+  left: 6px;
+  position: absolute;
+  right: 6px;
+}
+
 .botNote p {
-  color: #ffd8d1;
-  font-size: clamp(0.82rem, 1.9svh, 1.05rem);
-  font-weight: 800;
-  line-height: 1.25;
+  color: var(--ink);
+  font-size: 1.08rem;
+  line-height: 1.45;
   margin: 0;
 }
 
 .botNote strong {
-  color: var(--yellow);
+  font-weight: 800;
 }
 
 .errorMessage {
-  background: #ffdad6;
+  background: var(--danger);
   border: 2px solid #93000a;
   border-radius: 8px;
   color: #690005;
-  grid-area: error;
   font-weight: 900;
-  margin: 0 auto;
-  max-width: 570px;
-  padding: clamp(8px, 1.4svh, 12px) 14px;
+  margin: 18px 0 0;
+  max-width: 680px;
+  padding: 12px 14px;
   position: relative;
   text-align: center;
-  width: min(100%, 570px);
+  width: min(100%, 680px);
   z-index: 1;
 }
 
 .leaveButton {
-  align-self: center;
-  background: var(--panel-high);
-  border: 3px solid #e6e9f4;
-  border-radius: 0;
-  box-shadow: 5px 5px 0 var(--shadow);
-  color: var(--ink);
-  font-size: clamp(0.8rem, 1.6svh, 0.95rem);
-  grid-area: leave;
-  justify-self: start;
-  letter-spacing: 0.18em;
-  margin: 0;
-  min-height: clamp(48px, 7svh, 64px);
-  min-width: min(100%, 300px);
-  padding: 0 34px;
+  background: var(--panel-highest);
+  border: 0;
+  border-radius: 2px;
+  box-shadow: 4px 4px 0 var(--shadow);
+  color: #ffd5ce;
+  font-size: 1.25rem;
+  line-height: 1;
+  margin-top: 64px;
+  min-height: 52px;
+  min-width: min(100%, 268px);
+  padding: 0 38px;
   position: relative;
-  transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  transition: background 160ms ease, box-shadow 160ms ease, color 160ms ease, transform 160ms ease;
   z-index: 1;
 }
 
 .matchmakingShell .leaveButton:hover:not(:disabled),
 .matchmakingShell .leaveButton:focus-visible {
-  background: #3d404b;
-  box-shadow: 7px 7px 0 var(--shadow), 0 0 22px rgba(255, 180, 166, 0.2);
+  background: #3b3d48;
+  box-shadow:
+    5px 5px 0 var(--shadow),
+    0 0 22px rgba(255, 180, 166, 0.24);
+  color: var(--ink);
   outline: none;
-  transform: translate(-2px, -2px);
+  transform: translate(-1px, -1px);
 }
 
 .matchmakingShell .leaveButton:active:not(:disabled) {
-  box-shadow: 2px 2px 0 var(--shadow);
+  box-shadow: 1px 1px 0 var(--shadow);
   transform: translate(3px, 3px);
 }
 
-@media (max-width: 780px) {
+@media (max-width: 940px) {
   .matchmakingShell {
-    column-gap: clamp(8px, 3vw, 16px);
-    grid-template-areas:
-      "brand brand"
-      "hero hero"
-      "timer grid"
-      "note note"
-      "leave leave"
-      "error error";
-    grid-template-columns: minmax(120px, 0.78fr) minmax(0, 1.22fr);
-    grid-template-rows: auto auto minmax(0, 1fr) auto auto auto;
-    padding: clamp(10px, 2svh, 18px) clamp(12px, 3vw, 22px);
-    row-gap: clamp(8px, 1.4svh, 14px);
-  }
-
-  .brandBar {
-    gap: 8px;
-    justify-self: center;
-  }
-
-  .hero h1 {
-    font-size: clamp(1.65rem, 5svh, 2.6rem);
-  }
-
-  .hero p {
-    letter-spacing: 0.12em;
-    min-width: 0;
-    padding-inline: 16px;
-  }
-
-  .timerGauge {
-    padding: 8px;
-    width: min(100%, clamp(132px, 28svh, 220px));
-  }
-
-  .timerFace {
-    border-width: 4px;
-    height: calc(100% - clamp(30px, 6svh, 44px));
-    width: calc(100% - clamp(30px, 6svh, 44px));
-  }
-
-  .timerFace strong {
-    font-size: clamp(2.8rem, 7.2svh, 4.2rem);
-  }
-
-  .timerFace span {
-    font-size: clamp(0.54rem, 1.2svh, 0.7rem);
-  }
-
-  .gridHeader {
-    gap: 8px;
-    margin: 0 0 7px;
-  }
-
-  .gridHeader h2 {
-    font-size: clamp(0.92rem, 2svh, 1.15rem);
-  }
-
-  .gridHeader span {
-    font-size: clamp(0.58rem, 1.25svh, 0.72rem);
+    padding-bottom: 42px;
   }
 
   .gridList {
-    gap: 8px;
+    gap: 18px;
+  }
+
+  .racerCard,
+  .searchingCard {
+    padding: 18px 14px 16px;
+  }
+
+  .vehicleFrame,
+  .searchingCard span {
+    width: 82px;
+  }
+
+  .searchingCard span {
+    height: 82px;
+  }
+
+  .racerCard h3 {
+    font-size: 1.12rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .matchmakingShell {
+    padding: 14px 18px 38px;
+  }
+
+  .brandBar {
+    justify-self: center;
+  }
+
+  .brandText {
+    font-size: 1.55rem;
+  }
+
+  .timerSection {
+    margin-top: 40px;
+  }
+
+  .timerGauge {
+    width: 220px;
+  }
+
+  .timerFace {
+    height: 150px;
+    width: 150px;
+  }
+
+  .timerFace strong {
+    font-size: 3.1rem;
+  }
+
+  .timerFace span {
+    font-size: 0.82rem;
+  }
+
+  .gridSection {
+    margin-top: 42px;
+  }
+
+  .gridList {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .racerCard,
   .searchingCard {
-    border-width: 2px;
-    box-shadow: 3px 3px 0 var(--shadow);
-    height: clamp(64px, 12svh, 94px);
-    padding: 6px;
-  }
-
-  .vehicleFrame {
-    border-width: 2px;
-    width: clamp(34px, 6.5svh, 50px);
-  }
-
-  .racerCard h3 {
-    font-size: clamp(0.64rem, 1.35svh, 0.82rem);
-  }
-
-  .searchingCard span {
-    border-width: 2px;
-    height: clamp(20px, 3.6svh, 26px);
-    width: clamp(20px, 3.6svh, 26px);
-  }
-
-  .searchingCard p {
-    font-size: clamp(0.52rem, 1.1svh, 0.62rem);
+    aspect-ratio: 1.55 / 1;
   }
 
   .botNote {
-    border-left-width: 4px;
-    box-shadow: 4px 4px 0 var(--shadow);
-    justify-self: center;
-    padding: clamp(8px, 1.5svh, 12px) 12px;
-  }
-
-  .botNote p {
-    font-size: clamp(0.68rem, 1.45svh, 0.82rem);
-    line-height: 1.2;
+    margin-top: 48px;
   }
 
   .leaveButton {
-    justify-self: center;
-    min-height: clamp(40px, 5.8svh, 50px);
-    min-width: min(100%, 260px);
-    padding: 0 20px;
+    margin-top: 36px;
   }
 }
 
 @media (max-width: 500px) {
   .matchmakingShell {
-    column-gap: 8px;
-    grid-template-columns: minmax(116px, 0.75fr) minmax(0, 1.25fr);
-    padding-inline: 10px;
-  }
-
-  .brandMark {
-    height: clamp(22px, 3.6svh, 28px);
-    width: clamp(16px, 2.5svh, 20px);
-  }
-
-  .brandText {
-    font-size: clamp(1.05rem, 2.5svh, 1.35rem);
-  }
-
-  .hero h1 {
-    font-size: clamp(1.55rem, 4.6svh, 2.15rem);
-  }
-
-  .hero p {
     padding-inline: 12px;
   }
 
-  .gridHeader {
-    align-items: end;
-    flex-direction: row;
+  .timerGauge {
+    width: 188px;
   }
 
-  .gridHeader span {
-    text-align: right;
+  .timerFace {
+    height: 126px;
+    width: 126px;
+  }
+
+  .timerFace strong {
+    font-size: 2.55rem;
+  }
+
+  .timerFace span {
+    font-size: 0.72rem;
+    margin-top: 10px;
+  }
+
+  .gridHeader {
+    align-items: start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .gridHeader h2 {
+    font-size: 1.28rem;
+  }
+
+  .gridList {
+    gap: 14px;
+  }
+
+  .racerCard,
+  .searchingCard {
+    aspect-ratio: 1.12 / 1;
+    gap: 10px;
+    padding: 14px 10px 12px;
+  }
+
+  .vehicleFrame,
+  .searchingCard span {
+    width: 68px;
+  }
+
+  .searchingCard span {
+    border-width: 3px;
+    font-size: 2.4rem;
+    height: 68px;
+  }
+
+  .racerCard h3 {
+    font-size: 0.94rem;
+  }
+
+  .searchingCard p {
+    font-size: 0.74rem;
   }
 
   .botNote {
-    padding-inline: 10px;
+    align-items: flex-start;
+    padding: 12px 14px;
+  }
+
+  .botNote p {
+    font-size: 0.92rem;
   }
 
   .leaveButton {
-    letter-spacing: 0.12em;
-    min-width: min(100%, 230px);
+    font-size: 1.02rem;
+    min-width: min(100%, 240px);
   }
 }
 
-@media (max-height: 680px) {
+@media (max-height: 780px) and (min-width: 761px) {
   .matchmakingShell {
-    padding-block: 10px;
-    row-gap: 8px;
+    padding-bottom: 34px;
   }
 
-  .brandBar {
-    min-height: 30px;
-  }
-
-  .brandMark {
-    height: 22px;
-    width: 16px;
-  }
-
-  .brandText {
-    font-size: 1.15rem;
-  }
-
-  .hero h1 {
-    font-size: 1.8rem;
-  }
-
-  .hero p {
-    margin-top: 6px;
-    padding-block: 4px;
+  .timerSection {
+    margin-top: 34px;
   }
 
   .timerGauge {
-    width: min(100%, clamp(136px, 30svh, 200px));
+    width: 214px;
+  }
+
+  .timerFace {
+    height: 144px;
+    width: 144px;
   }
 
   .timerFace strong {
     font-size: 3rem;
   }
 
-  .gridHeader {
-    margin-bottom: 6px;
+  .gridSection {
+    margin-top: 42px;
   }
 
   .racerCard,
   .searchingCard {
-    height: 68px;
-    padding: 5px;
+    aspect-ratio: 1.55 / 1;
+    padding-block: 14px;
   }
 
-  .vehicleFrame {
-    width: 34px;
+  .vehicleFrame,
+  .searchingCard span {
+    width: 72px;
+  }
+
+  .searchingCard span {
+    height: 72px;
   }
 
   .botNote {
-    padding-block: 8px;
-  }
-
-  .botNote p {
-    font-size: 0.72rem;
+    margin-top: 50px;
   }
 
   .leaveButton {
-    min-height: 40px;
-  }
-}
-
-@media (max-height: 560px) {
-  .hero h1 {
-    font-size: 1.55rem;
-  }
-
-  .hero p {
-    font-size: 0.58rem;
-  }
-
-  .timerGauge {
-    width: min(100%, 128px);
-  }
-
-  .timerFace strong {
-    font-size: 2.4rem;
-  }
-
-  .timerFace span {
-    font-size: 0.5rem;
-  }
-
-  .racerCard,
-  .searchingCard {
-    height: 56px;
-  }
-
-  .vehicleFrame {
-    width: 28px;
-  }
-
-  .racerCard h3,
-  .botNote p {
-    font-size: 0.64rem;
-  }
-
-  .leaveButton {
-    min-height: 34px;
-    min-width: min(100%, 220px);
+    margin-top: 34px;
   }
 }
