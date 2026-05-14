@@ -225,6 +225,23 @@ async def emit_waiting_status(start_time):
         await sio.emit("matchmaking_status", status, to=sid)
 
 
+async def remove_waiting_player(sid):
+    removed_player = waiting_players.pop(sid, None)
+    if removed_player is None:
+        return False
+
+    if waiting_players and matchmaking_started_at is not None:
+        await emit_waiting_status(matchmaking_started_at)
+    elif (
+        not waiting_players
+        and matchmaking_task is not None
+        and not matchmaking_task.done()
+    ):
+        matchmaking_task.cancel()
+
+    return True
+
+
 async def matchmaking_countdown():
     global matchmaking_started_at, matchmaking_task
 
@@ -416,15 +433,18 @@ async def connect(sid, environ):
 
 @sio.event
 async def disconnect(sid):
-    waiting_players.pop(sid, None)
-    if matchmaking_started_at is not None:
-        await emit_waiting_status(matchmaking_started_at)
+    await remove_waiting_player(sid)
 
     game_id = player_games.get(sid)
     if game_id and game_id in games and sid in games[game_id]["players"]:
         game = games[game_id]
         game["players"][sid]["connected"] = False
         await emit_race_standings(game)
+
+
+@sio.event
+async def leave_queue(sid):
+    await remove_waiting_player(sid)
 
 
 @sio.event
@@ -436,7 +456,15 @@ async def join_queue(sid, data):
         return
 
     raw_name = str((data or {}).get("name", "")).strip()
-    player_name = raw_name[:24] or f"Player {random.randint(100, 999)}"
+    if not raw_name:
+        await sio.emit(
+            "error_message",
+            {"message": "Username is required to start the game."},
+            to=sid,
+        )
+        return
+
+    player_name = raw_name[:24]
     ride = normalize_ride((data or {}).get("ride"))
     paint = normalize_paint((data or {}).get("paint"))
     waiting_players[sid] = {

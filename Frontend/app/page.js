@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { io } from "socket.io-client";
+import MatchmakingPage from "./matchmaking_page";
 import WelcomePage from "./welcome_page";
 
 
@@ -49,6 +50,7 @@ export default function Home() {
     secondsLeft: DEFAULT_MATCHMAKING_SECONDS,
     playerCount: 0,
     players: [],
+    playerProfiles: [],
   });
   const [gameInfo, setGameInfo] = useState(null);
   const [question, setQuestion] = useState(null);
@@ -464,18 +466,40 @@ export default function Home() {
   function joinQueue(event, profile = {}) {
     event.preventDefault();
     primeSoundEffects();
+    const trimmedPlayerName = playerName.trim();
     setErrorMessage("");
     setPhase("waiting");
     setWaiting({
       secondsLeft: config.matchmakingSeconds,
       playerCount: 1,
-      players: [playerName.trim() || "Player"],
+      players: [trimmedPlayerName],
+      playerProfiles: [
+        {
+          id: socketRef.current?.id || currentPlayerId || "current-player",
+          name: trimmedPlayerName,
+          ride: profile.ride,
+          paint: profile.paint,
+        },
+      ],
     });
     socketRef.current?.emit("join_queue", {
       name: playerName,
       ride: profile.ride,
       paint: profile.paint,
     });
+  }
+
+  function leaveLobby() {
+    socketRef.current?.emit("leave_queue");
+    gameCountdownPlayedRef.current = false;
+    setErrorMessage("");
+    setWaiting({
+      secondsLeft: config.matchmakingSeconds,
+      playerCount: 0,
+      players: [],
+      playerProfiles: [],
+    });
+    setPhase("intro");
   }
 
   function chooseAnswer(option) {
@@ -564,47 +588,32 @@ export default function Home() {
     );
   }
 
-  return (
-    <main className={phase === "waiting" ? "waitingShell" : "gameShell"}>
-      {phase !== "waiting" && <div className="gameBackdrop" aria-hidden="true" />}
+  if (phase === "waiting") {
+    return (
+      <MatchmakingPage
+        currentPlayerId={currentPlayerId}
+        errorMessage={errorMessage}
+        matchmakingSeconds={config.matchmakingSeconds}
+        onLeave={leaveLobby}
+        waiting={waiting}
+      />
+    );
+  }
 
-      <section
-        className={phase === "waiting" ? "topbar waitingTopbar" : "gameTopbar"}
-        aria-label="Game status"
-      >
-        {phase === "waiting" ? (
-          <div>
-            <p className="eyebrow">Nitro Trivia</p>
-            <h1>Matchmaking</h1>
-          </div>
-        ) : (
-          <div className="roundBadge">
-            {phase === "finished"
-              ? "Final lap"
-              : `Round ${question?.index || 1}/${question?.total || config.questionsPerGame}`}
-          </div>
-        )}
+  return (
+    <main className="gameShell">
+      <div className="gameBackdrop" aria-hidden="true" />
+
+      <section className="gameTopbar" aria-label="Game status">
+        <div className="roundBadge">
+          {phase === "finished"
+            ? "Final lap"
+            : `Round ${question?.index || 1}/${question?.total || config.questionsPerGame}`}
+        </div>
         <span className={connectionStatus === "Connected" ? "status online" : "status"}>
           {connectionStatus}
         </span>
       </section>
-
-      {phase === "waiting" && (
-        <section className="panel center">
-          <p className="eyebrow">Matchmaking</p>
-          <div className="countdown">{waiting.secondsLeft}</div>
-          <h2>Waiting for players</h2>
-          <p className="muted">
-            {waiting.playerCount} player{waiting.playerCount === 1 ? "" : "s"} ready. The game
-            will start even if you are playing solo.
-          </p>
-          <div className="playerList">
-            {waiting.players.map((name) => (
-              <span key={name}>{name}</span>
-            ))}
-          </div>
-        </section>
-      )}
 
       {phase === "game" && question && (
         <section className="panel questionPanel">

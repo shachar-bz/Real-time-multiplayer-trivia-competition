@@ -125,6 +125,13 @@
   box-shadow: 8px 8px 0 var(--shadow), 0 0 0 4px rgba(0, 210, 253, 0.2);
 }
 
+.nameError {
+  color: #ff6b6b;
+  font-size: 14px;
+  font-weight: 800;
+  margin: 6px 0 0;
+}
+
 .heroHeader {
   margin-bottom: 56px;
   max-width: 760px;
