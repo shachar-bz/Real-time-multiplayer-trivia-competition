@@ -16,6 +16,7 @@ const HELP_FIFTY_FIFTY = "fifty_fifty";
 const HELP_DOUBLE_SCORE = "double_score";
 const HELP_CALL_A_FRIEND = "call_a_friend";
 const SOUND_EFFECTS = {
+  click: "/sounds/click.mp3",
   correct_answer: "/sounds/correct_answer.mp3",
   wrong_answer: "/sounds/wrong_answer.mp3",
   win_game: "/sounds/win_game.mp3",
@@ -24,6 +25,7 @@ const SOUND_EFFECTS = {
   call_friend: "/sounds/call_friend.mp3",
   ticking_clock: "/sounds/ticking_clock.mp3",
   game_countdown: "/sounds/game_countdown.mp3",
+  no_answer: "/sounds/no_answer.mp3",
 };
 const EMPTY_RACE_STANDINGS = {
   finishScore: 0,
@@ -320,7 +322,9 @@ export default function Home() {
       const currentPlayerResult = questionResult.answers.find(
         (answer) => answer.playerId === socket.id
       );
-      if (currentPlayerResult?.selectedOption) {
+      if (!currentPlayerResult?.selectedOption) {
+        playSoundEffect({ name: "no_answer" });
+      } else {
         playSoundEffect({
           name: currentPlayerResult.isCorrect ? "correct_answer" : "wrong_answer",
         });
@@ -528,6 +532,7 @@ export default function Home() {
       return;
     }
 
+    playSoundEffect({ name: "click" });
     setErrorMessage("");
     if (helpType === HELP_CALL_A_FRIEND) {
       setFriendPopup({
