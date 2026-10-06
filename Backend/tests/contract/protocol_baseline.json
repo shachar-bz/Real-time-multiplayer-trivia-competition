@@ -1,0 +1,500 @@
+{
+  "events": {
+    "answer_received": [
+      {
+        "questionId": "number",
+        "selectedOption": "str"
+      }
+    ],
+    "chat_history": [
+      [
+        {
+          "content": "str",
+          "id": "number",
+          "is_own": "bool",
+          "timestamp": "str",
+          "username": "str"
+        }
+      ]
+    ],
+    "chat_history_cleared": [
+      {}
+    ],
+    "chat_new_message": [
+      {
+        "content": "str",
+        "game_id": "str",
+        "id": "number",
+        "timestamp": "str",
+        "user_id": "str",
+        "username": "str"
+      }
+    ],
+    "chat_unread_update": [
+      {
+        "unread_count": "number"
+      }
+    ],
+    "connected": [
+      {
+        "matchmakingSeconds": "number",
+        "profileChoices": {
+          "defaults": {
+            "paint": "str",
+            "ride": "str"
+          },
+          "paints": [
+            {
+              "hex": "str",
+              "id": "str",
+              "label": "str"
+            }
+          ],
+          "rides": [
+            {
+              "id": "str",
+              "label": "str"
+            }
+          ]
+        },
+        "questionSeconds": "number",
+        "questionsPerGame": "number",
+        "sid": "str"
+      }
+    ],
+    "error_message": [
+      {
+        "message": "str"
+      }
+    ],
+    "game_finished": [
+      {
+        "leaderboard": [
+          {
+            "connected": "bool",
+            "id": "str",
+            "name": "str",
+            "paint": "str",
+            "paintHex": "str",
+            "paintLabel": "str",
+            "ride": "str",
+            "rideLabel": "str",
+            "score": "number"
+          }
+        ],
+        "questionCount": "number",
+        "raceStandings": {
+          "finishScore": "number",
+          "players": [
+            {
+              "connected": "bool",
+              "id": "str",
+              "isBot": "bool",
+              "name": "str",
+              "paint": "str",
+              "paintHex": "str",
+              "paintLabel": "str",
+              "progressRatio": "number",
+              "ride": "str",
+              "rideLabel": "str",
+              "score": "number"
+            }
+          ]
+        }
+      }
+    ],
+    "game_started": [
+      {
+        "gameId": "str",
+        "playerProfiles": [
+          {
+            "id": "str",
+            "isBot": "bool",
+            "name": "str",
+            "paint": "str",
+            "paintHex": "str",
+            "paintLabel": "str",
+            "ride": "str",
+            "rideLabel": "str"
+          }
+        ],
+        "players": [
+          "str"
+        ],
+        "questionCount": "number",
+        "questionSeconds": "number",
+        "raceStandings": {
+          "finishScore": "number",
+          "players": [
+            {
+              "connected": "bool",
+              "id": "str",
+              "isBot": "bool",
+              "name": "str",
+              "paint": "str",
+              "paintHex": "str",
+              "paintLabel": "str",
+              "progressRatio": "number",
+              "ride": "str",
+              "rideLabel": "str",
+              "score": "number"
+            }
+          ]
+        }
+      }
+    ],
+    "help_used": [
+      {
+        "confidence": "number",
+        "friendAnswered": "bool",
+        "helpType": "str",
+        "helps": {
+          "callFriend": "bool",
+          "doubleScore": "bool",
+          "fiftyFifty": "bool"
+        },
+        "message": "str",
+        "questionId": "number"
+      },
+      {
+        "doubleScoreActive": "bool",
+        "helpType": "str",
+        "helps": {
+          "callFriend": "bool",
+          "doubleScore": "bool",
+          "fiftyFifty": "bool"
+        },
+        "questionId": "number"
+      },
+      {
+        "helpType": "str",
+        "helps": {
+          "callFriend": "bool",
+          "doubleScore": "bool",
+          "fiftyFifty": "bool"
+        },
+        "questionId": "number",
+        "removedOptions": [
+          "str"
+        ]
+      }
+    ],
+    "matchmaking_status": [
+      {
+        "playerCount": "number",
+        "playerProfiles": [
+          {
+            "id": "str",
+            "isBot": "bool",
+            "name": "str",
+            "paint": "str",
+            "paintHex": "str",
+            "paintLabel": "str",
+            "ride": "str",
+            "rideLabel": "str"
+          }
+        ],
+        "players": [
+          "str"
+        ],
+        "secondsLeft": "number"
+      }
+    ],
+    "player_state": [
+      {
+        "helps": {
+          "callFriend": "bool",
+          "doubleScore": "bool",
+          "fiftyFifty": "bool"
+        },
+        "profile": {
+          "id": "str",
+          "isBot": "bool",
+          "name": "str",
+          "paint": "str",
+          "paintHex": "str",
+          "paintLabel": "str",
+          "ride": "str",
+          "rideLabel": "str"
+        }
+      }
+    ],
+    "question": [
+      {
+        "difficulty": "number",
+        "id": "number",
+        "index": "number",
+        "options": [
+          {
+            "key": "str",
+            "text": "str"
+          }
+        ],
+        "seconds": "number",
+        "text": "str",
+        "topic": "str",
+        "total": "number"
+      }
+    ],
+    "question_result": [
+      {
+        "answers": [
+          {
+            "doubleScoreUsed": "bool",
+            "isCorrect": "bool",
+            "name": "str",
+            "paint": "str",
+            "playerId": "str",
+            "pointsEarned": "number",
+            "ride": "str",
+            "selectedOption": "null|str"
+          }
+        ],
+        "correctAnswer": "str",
+        "correctOption": "str",
+        "leaderboard": [
+          {
+            "connected": "bool",
+            "id": "str",
+            "name": "str",
+            "paint": "str",
+            "paintHex": "str",
+            "paintLabel": "str",
+            "ride": "str",
+            "rideLabel": "str",
+            "score": "number"
+          }
+        ],
+        "questionId": "number",
+        "raceStandings": {
+          "finishScore": "number",
+          "players": [
+            {
+              "connected": "bool",
+              "id": "str",
+              "isBot": "bool",
+              "name": "str",
+              "paint": "str",
+              "paintHex": "str",
+              "paintLabel": "str",
+              "progressRatio": "number",
+              "ride": "str",
+              "rideLabel": "str",
+              "score": "number"
+            }
+          ]
+        }
+      },
+      {
+        "answers": [
+          {
+            "doubleScoreUsed": "bool",
+            "isCorrect": "bool",
+            "name": "str",
+            "paint": "str",
+            "playerId": "str",
+            "pointsEarned": "number",
+            "ride": "str",
+            "selectedOption": "str"
+          }
+        ],
+        "correctAnswer": "str",
+        "correctOption": "str",
+        "leaderboard": [
+          {
+            "connected": "bool",
+            "id": "str",
+            "name": "str",
+            "paint": "str",
+            "paintHex": "str",
+            "paintLabel": "str",
+            "ride": "str",
+            "rideLabel": "str",
+            "score": "number"
+          }
+        ],
+        "questionId": "number",
+        "raceStandings": {
+          "finishScore": "number",
+          "players": [
+            {
+              "connected": "bool",
+              "id": "str",
+              "isBot": "bool",
+              "name": "str",
+              "paint": "str",
+              "paintHex": "str",
+              "paintLabel": "str",
+              "progressRatio": "number",
+              "ride": "str",
+              "rideLabel": "str",
+              "score": "number"
+            }
+          ]
+        }
+      }
+    ],
+    "question_timer_paused": [
+      {
+        "callerId": "str",
+        "callerName": "str",
+        "message": "str",
+        "questionId": "number",
+        "secondsLeft": "number"
+      }
+    ],
+    "question_timer_resumed": [
+      {
+        "questionId": "number",
+        "secondsLeft": "number"
+      }
+    ],
+    "race_standings": [
+      {
+        "finishScore": "number",
+        "players": [
+          {
+            "connected": "bool",
+            "id": "str",
+            "isBot": "bool",
+            "name": "str",
+            "paint": "str",
+            "paintHex": "str",
+            "paintLabel": "str",
+            "progressRatio": "number",
+            "ride": "str",
+            "rideLabel": "str",
+            "score": "number"
+          }
+        ]
+      }
+    ],
+    "sound_effect": [
+      {
+        "name": "str",
+        "url": "str"
+      }
+    ]
+  },
+  "http": {
+    "GET /": {
+      "activeGames": "number",
+      "dbPath": "str",
+      "status": "str",
+      "waitingPlayers": "number"
+    },
+    "GET /sounds/win_game.mp3 status": 200
+  },
+  "sequences": {
+    "multiplayer:alice": [
+      "connected",
+      "error_message",
+      "matchmaking_status",
+      "game_started",
+      "race_standings",
+      "player_state",
+      "error_message",
+      "question",
+      "help_used",
+      "error_message",
+      "question_timer_paused",
+      "question_timer_resumed",
+      "chat_new_message",
+      "sound_effect",
+      "answer_received",
+      "race_standings",
+      "sound_effect",
+      "race_standings",
+      "sound_effect",
+      "race_standings",
+      "question_result",
+      "question",
+      "race_standings",
+      "sound_effect",
+      "answer_received",
+      "race_standings",
+      "question_result",
+      "game_finished",
+      "sound_effect",
+      "chat_history_cleared"
+    ],
+    "multiplayer:bob": [
+      "connected",
+      "matchmaking_status",
+      "game_started",
+      "race_standings",
+      "player_state",
+      "question",
+      "help_used",
+      "question_timer_paused",
+      "help_used",
+      "question_timer_resumed",
+      "chat_new_message",
+      "chat_unread_update",
+      "sound_effect",
+      "chat_unread_update",
+      "chat_history",
+      "sound_effect",
+      "race_standings",
+      "sound_effect",
+      "answer_received",
+      "race_standings",
+      "sound_effect",
+      "race_standings",
+      "question_result",
+      "question",
+      "race_standings",
+      "sound_effect",
+      "race_standings",
+      "question_result",
+      "game_finished",
+      "chat_history_cleared"
+    ],
+    "multiplayer:carol_leaves": [
+      "connected",
+      "matchmaking_status"
+    ],
+    "multiplayer:erin_disconnects": [
+      "connected",
+      "matchmaking_status",
+      "game_started",
+      "race_standings",
+      "player_state",
+      "question",
+      "question_timer_paused",
+      "question_timer_resumed",
+      "chat_new_message",
+      "chat_unread_update",
+      "sound_effect",
+      "race_standings",
+      "sound_effect",
+      "race_standings",
+      "sound_effect",
+      "answer_received",
+      "race_standings",
+      "question_result",
+      "question"
+    ],
+    "solo:dana": [
+      "connected",
+      "matchmaking_status",
+      "game_started",
+      "race_standings",
+      "player_state",
+      "question",
+      "race_standings",
+      "sound_effect",
+      "answer_received",
+      "race_standings",
+      "question_result",
+      "question",
+      "race_standings",
+      "sound_effect",
+      "answer_received",
+      "race_standings",
+      "question_result",
+      "game_finished",
+      "chat_history_cleared"
+    ]
+  }
+}
