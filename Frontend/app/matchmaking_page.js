@@ -1,27 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
-import { PAINT_COLORS, RIDES } from "@/lib/vehicles";
+import { paintFor, rideFor } from "@/lib/vehicles";
 import styles from "./matchmaking_page.module.css";
 
 const TARGET_GRID_SLOTS = 4;
-
-function normalizeKey(value) {
-  return String(value || "")
-    .trim()
-    .replaceAll("_", "-")
-    .toLowerCase();
-}
-
-function rideFor(profile) {
-  const rideKey = normalizeKey(profile?.ride);
-  return RIDES.find((ride) => ride.id === rideKey) || RIDES[0];
-}
-
-function paintFor(profile) {
-  const paintKey = normalizeKey(profile?.paint);
-  return PAINT_COLORS.find((paint) => paint.id === paintKey) || PAINT_COLORS[0];
-}
 
 function profileListFromWaiting(waiting) {
   if (Array.isArray(waiting?.playerProfiles) && waiting.playerProfiles.length > 0) {

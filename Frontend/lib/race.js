@@ -1,22 +1,16 @@
-import { PAINT_COLORS, RIDES } from "./vehicles.js";
+/**
+ * Race helpers: how far along the track a racer is and who is in front.
+ * Pure functions over the server's `raceStandings` / `leaderboard` payloads.
+ */
 
-export function normalizeChoiceKey(value) {
-  return String(value || "")
-    .trim()
-    .replaceAll("_", "-")
-    .toLowerCase();
+function scoreOf(player) {
+  return Number(player?.score) || 0;
 }
 
-export function rideFor(player) {
-  const rideKey = normalizeChoiceKey(player?.ride);
-  return RIDES.find((ride) => normalizeChoiceKey(ride.id) === rideKey) || RIDES[0];
-}
-
-export function paintFor(player) {
-  const paintKey = normalizeChoiceKey(player?.paint);
-  return PAINT_COLORS.find((paint) => normalizeChoiceKey(paint.id) === paintKey) || PAINT_COLORS[0];
-}
-
+/**
+ * A racer's position on the track as a ratio from 0 (start) to 1 (finish line).
+ * Uses the server's `progressRatio` when present, otherwise score / finishScore.
+ */
 export function progressFor(player, standings) {
   const rawProgress = Number(player?.progressRatio);
 
@@ -25,26 +19,28 @@ export function progressFor(player, standings) {
   }
 
   const finishScore = Math.max(1, Number(standings?.finishScore) || 1);
-  return Math.max(0, Math.min(1, (Number(player?.score) || 0) / finishScore));
+  return Math.max(0, Math.min(1, scoreOf(player) / finishScore));
 }
 
+/** A sorted copy: highest score first, ties broken alphabetically by name. */
+export function sortPlayersByScore(players) {
+  return [...(players || [])].sort((first, second) => {
+    const scoreDelta = scoreOf(second) - scoreOf(first);
+
+    if (scoreDelta !== 0) {
+      return scoreDelta;
+    }
+
+    return String(first?.name || "").localeCompare(String(second?.name || ""));
+  });
+}
+
+/** The standings' racers by score, or the leaderboard's when the standings are empty. */
 export function playersByScore(standings, fallbackLeaderboard = []) {
   const players =
     standings?.players?.length > 0
       ? standings.players
       : fallbackLeaderboard;
 
-  return [...players].sort((first, second) => {
-    const scoreDelta = (Number(second.score) || 0) - (Number(first.score) || 0);
-
-    if (scoreDelta !== 0) {
-      return scoreDelta;
-    }
-
-    return String(first.name || "").localeCompare(String(second.name || ""));
-  });
-}
-
-export function cx(...classNames) {
-  return classNames.filter(Boolean).join(" ");
+  return sortPlayersByScore(players);
 }

@@ -1,3 +1,9 @@
+/**
+ * Vehicle catalogue: the rides and paint jobs a racer can pick, plus lookups
+ * that turn whatever the server echoes back ("monster_truck", "Blue", missing)
+ * into a catalogue entry. Unknown values fall back to the first entry.
+ */
+
 export const PAINT_COLORS = [
   { id: "red", name: "Red", hex: "#d91400", glow: "rgba(217, 20, 0, 0.55)" },
   { id: "pink", name: "Pink", hex: "#ffb4a6", glow: "rgba(255, 180, 166, 0.55)" },
@@ -40,3 +46,23 @@ export const RIDES = [
     alt: "A sharp superbike angled for a high-speed turn.",
   },
 ];
+
+/** "Monster_Truck " -> "monster-truck", so server values and catalogue ids compare equal. */
+export function normalizeChoiceKey(value) {
+  return String(value || "")
+    .trim()
+    .replaceAll("_", "-")
+    .toLowerCase();
+}
+
+/** The catalogue ride for anything with a `ride` field, defaulting to the first ride. */
+export function rideFor(player) {
+  const rideKey = normalizeChoiceKey(player?.ride);
+  return RIDES.find((ride) => normalizeChoiceKey(ride.id) === rideKey) || RIDES[0];
+}
+
+/** The catalogue paint for anything with a `paint` field, defaulting to the first paint. */
+export function paintFor(player) {
+  const paintKey = normalizeChoiceKey(player?.paint);
+  return PAINT_COLORS.find((paint) => normalizeChoiceKey(paint.id) === paintKey) || PAINT_COLORS[0];
+}

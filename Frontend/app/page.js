@@ -5,16 +5,16 @@ import { io } from "socket.io-client";
 import GamePage from "./game_page";
 import MatchmakingPage from "./matchmaking_page";
 import WelcomePage from "./welcome_page";
+import {
+  DEFAULT_MATCHMAKING_SECONDS,
+  DEFAULT_QUESTIONS_PER_GAME,
+  DEFAULT_QUESTION_SECONDS,
+  GAME_COUNTDOWN_SECONDS,
+  SERVER_URL,
+} from "@/lib/config";
+import { ClientEvent, Lifeline, ServerEvent } from "@/lib/protocol";
 
 
-const SERVER_URL = "http://localhost:8080";
-const DEFAULT_MATCHMAKING_SECONDS = 30;
-const DEFAULT_QUESTION_SECONDS = 20;
-const DEFAULT_QUESTIONS_PER_GAME = 10;
-const GAME_COUNTDOWN_SECONDS = 4;
-const HELP_FIFTY_FIFTY = "fifty_fifty";
-const HELP_DOUBLE_SCORE = "double_score";
-const HELP_CALL_A_FRIEND = "call_a_friend";
 const SOUND_EFFECTS = {
   click: "/sounds/click.mp3",
   correct_answer: "/sounds/correct_answer.mp3",
@@ -202,7 +202,7 @@ export default function Home() {
       setCurrentPlayerId(socket.id);
     });
     socket.on("disconnect", () => setConnectionStatus("Disconnected"));
-    socket.on("connected", (serverConfig) => {
+    socket.on(ServerEvent.CONNECTED, (serverConfig) => {
       setCurrentPlayerId(serverConfig.sid);
       setConfig({
         matchmakingSeconds: serverConfig.matchmakingSeconds,
@@ -210,7 +210,7 @@ export default function Home() {
         questionsPerGame: serverConfig.questionsPerGame,
       });
     });
-    socket.on("matchmaking_status", (status) => {
+    socket.on(ServerEvent.MATCHMAKING_STATUS, (status) => {
       setPhase("waiting");
       setWaiting(status);
       if (status.secondsLeft > GAME_COUNTDOWN_SECONDS) {
@@ -224,7 +224,7 @@ export default function Home() {
         playSoundEffect({ name: "game_countdown" });
       }
     });
-    socket.on("game_started", (info) => {
+    socket.on(ServerEvent.GAME_STARTED, (info) => {
       const startingRaceStandings = info.raceStandings || EMPTY_RACE_STANDINGS;
 
       stopManagedSound("call_friend");
@@ -255,10 +255,10 @@ export default function Home() {
         kind: "",
       });
     });
-    socket.on("player_state", (state) => {
+    socket.on(ServerEvent.PLAYER_STATE, (state) => {
       setHelps(state.helps);
     });
-    socket.on("question", (nextQuestion) => {
+    socket.on(ServerEvent.QUESTION, (nextQuestion) => {
       stopManagedSound("call_friend");
       setPhase("game");
       setQuestion(nextQuestion);
@@ -278,12 +278,12 @@ export default function Home() {
       setTimeLeft(nextQuestion.seconds);
       setQuestionEndsAt(Date.now() + nextQuestion.seconds * 1000);
     });
-    socket.on("answer_received", (answer) => {
+    socket.on(ServerEvent.ANSWER_RECEIVED, (answer) => {
       setSelectedOption(answer.selectedOption);
       setLockedAnswer(true);
     });
-    socket.on("sound_effect", playSoundEffect);
-    socket.on("chat_new_message", (message) => {
+    socket.on(ServerEvent.SOUND_EFFECT, playSoundEffect);
+    socket.on(ServerEvent.CHAT_NEW_MESSAGE, (message) => {
       const normalizedMessage = {
         ...message,
         is_own: message.is_own ?? message.user_id === socket.id,
@@ -293,21 +293,21 @@ export default function Home() {
         scrollChatToBottom();
       }
     });
-    socket.on("chat_history", (messages) => {
+    socket.on(ServerEvent.CHAT_HISTORY, (messages) => {
       setChatMessages(messages);
       scrollChatToBottom();
     });
-    socket.on("chat_unread_update", (update) => {
+    socket.on(ServerEvent.CHAT_UNREAD_UPDATE, (update) => {
       setChatUnreadCount(update.unread_count || 0);
     });
-    socket.on("chat_history_cleared", () => {
+    socket.on(ServerEvent.CHAT_HISTORY_CLEARED, () => {
       setChatMessages([]);
       setChatUnreadCount(0);
     });
-    socket.on("race_standings", (standings) => {
+    socket.on(ServerEvent.RACE_STANDINGS, (standings) => {
       setRaceStandings(standings || EMPTY_RACE_STANDINGS);
     });
-    socket.on("question_result", (questionResult) => {
+    socket.on(ServerEvent.QUESTION_RESULT, (questionResult) => {
       const nextRaceStandings = questionResult.raceStandings || EMPTY_RACE_STANDINGS;
 
       stopManagedSound("ticking_clock");
@@ -330,15 +330,15 @@ export default function Home() {
         });
       }
     });
-    socket.on("help_used", (helpResult) => {
+    socket.on(ServerEvent.HELP_USED, (helpResult) => {
       setHelps(helpResult.helps);
-      if (helpResult.helpType === HELP_FIFTY_FIFTY) {
+      if (helpResult.helpType === Lifeline.FIFTY_FIFTY) {
         setRemovedOptions(helpResult.removedOptions);
       }
-      if (helpResult.helpType === HELP_DOUBLE_SCORE) {
+      if (helpResult.helpType === Lifeline.DOUBLE_SCORE) {
         setDoubleScoreActive(Boolean(helpResult.doubleScoreActive));
       }
-      if (helpResult.helpType === HELP_CALL_A_FRIEND) {
+      if (helpResult.helpType === Lifeline.CALL_A_FRIEND) {
         stopManagedSound("call_friend");
         setFriendPopup({
           open: true,
@@ -350,7 +350,7 @@ export default function Home() {
         });
       }
     });
-    socket.on("question_timer_paused", (pauseInfo) => {
+    socket.on(ServerEvent.QUESTION_TIMER_PAUSED, (pauseInfo) => {
       stopManagedSound("ticking_clock");
       setTimeLeft(pauseInfo.secondsLeft);
       setQuestionEndsAt(null);
@@ -376,7 +376,7 @@ export default function Home() {
         kind: "observer_waiting",
       });
     });
-    socket.on("question_timer_resumed", (resumeInfo) => {
+    socket.on(ServerEvent.QUESTION_TIMER_RESUMED, (resumeInfo) => {
       stopManagedSound("call_friend");
       setTimeLeft(resumeInfo.secondsLeft);
       setQuestionEndsAt(Date.now() + resumeInfo.secondsLeft * 1000);
@@ -395,7 +395,7 @@ export default function Home() {
         return currentPopup;
       });
     });
-    socket.on("game_finished", (summary) => {
+    socket.on(ServerEvent.GAME_FINISHED, (summary) => {
       const finalRaceStandings = summary.raceStandings || EMPTY_RACE_STANDINGS;
 
       stopManagedSound("call_friend");
@@ -422,7 +422,7 @@ export default function Home() {
         kind: "",
       });
     });
-    socket.on("error_message", (error) => {
+    socket.on(ServerEvent.ERROR_MESSAGE, (error) => {
       stopManagedSound("call_friend");
       setErrorMessage(error.message);
       setFriendPopup((currentPopup) =>
@@ -493,7 +493,7 @@ export default function Home() {
         },
       ],
     });
-    socketRef.current?.emit("join_queue", {
+    socketRef.current?.emit(ClientEvent.JOIN_QUEUE, {
       name: playerName,
       ride: profile.ride,
       paint: profile.paint,
@@ -501,7 +501,7 @@ export default function Home() {
   }
 
   function leaveLobby() {
-    socketRef.current?.emit("leave_queue");
+    socketRef.current?.emit(ClientEvent.LEAVE_QUEUE);
     gameCountdownPlayedRef.current = false;
     setErrorMessage("");
     setWaiting({
@@ -521,7 +521,7 @@ export default function Home() {
     playSoundEffect({ name: "click_possible_answer" });
     setSelectedOption(option);
     setLockedAnswer(true);
-    socketRef.current?.emit("answer", {
+    socketRef.current?.emit(ClientEvent.ANSWER, {
       questionId: question.id,
       option,
     });
@@ -534,7 +534,7 @@ export default function Home() {
 
     playSoundEffect({ name: "click" });
     setErrorMessage("");
-    if (helpType === HELP_CALL_A_FRIEND) {
+    if (helpType === Lifeline.CALL_A_FRIEND) {
       setFriendPopup({
         open: true,
         loading: true,
@@ -544,7 +544,7 @@ export default function Home() {
         kind: "caller_loading",
       });
     }
-    socketRef.current?.emit("use_help", {
+    socketRef.current?.emit(ClientEvent.USE_HELP, {
       questionId: question.id,
       helpType,
     });
@@ -557,8 +557,8 @@ export default function Home() {
 
     setChatOpen(true);
     setChatUnreadCount(0);
-    socketRef.current?.emit("chat_request_history", { game_id: gameInfo.gameId });
-    socketRef.current?.emit("chat_open", { game_id: gameInfo.gameId });
+    socketRef.current?.emit(ClientEvent.CHAT_REQUEST_HISTORY, { game_id: gameInfo.gameId });
+    socketRef.current?.emit(ClientEvent.CHAT_OPEN, { game_id: gameInfo.gameId });
     scrollChatToBottom();
   }
 
@@ -574,7 +574,7 @@ export default function Home() {
       return;
     }
 
-    socketRef.current?.emit("chat_send_message", {
+    socketRef.current?.emit(ClientEvent.CHAT_SEND_MESSAGE, {
       game_id: gameInfo.gameId,
       content,
     });

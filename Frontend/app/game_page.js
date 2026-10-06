@@ -3,12 +3,11 @@
 import { useMemo } from "react";
 import FinalLeaderboardPage from "./final_leaderboard_page";
 import ResultPage from "./result_page";
-import { cx, paintFor, rideFor } from "@/lib/race";
+import { cx } from "@/lib/classNames";
+import { Lifeline } from "@/lib/protocol";
+import { paintFor, rideFor } from "@/lib/vehicles";
 import styles from "./game_page.module.css";
 
-const HELP_FIFTY_FIFTY = "fifty_fifty";
-const HELP_DOUBLE_SCORE = "double_score";
-const HELP_CALL_A_FRIEND = "call_a_friend";
 const FIXED_LANE_COUNT = 3;
 
 export default function GamePage({
@@ -158,7 +157,7 @@ function QuestionStage({
           aria-label="Use fifty fifty"
           className={styles.helpFifty}
           disabled={!helps.fiftyFifty || lockedAnswer || removedOptions.length > 0}
-          onClick={() => onUseHelp(HELP_FIFTY_FIFTY)}
+          onClick={() => onUseHelp(Lifeline.FIFTY_FIFTY)}
           type="button"
         >
           50/50
@@ -167,7 +166,7 @@ function QuestionStage({
           aria-label="Call a friend"
           className={styles.helpCall}
           disabled={!helps.callFriend || lockedAnswer || friendPopup.loading}
-          onClick={() => onUseHelp(HELP_CALL_A_FRIEND)}
+          onClick={() => onUseHelp(Lifeline.CALL_A_FRIEND)}
           type="button"
         >
           <span className={styles.callGlyph} aria-hidden="true" />
@@ -186,7 +185,7 @@ function QuestionStage({
           aria-label="Use double score"
           className={cx(styles.helpDouble, doubleScoreActive ? styles.helpActive : "")}
           disabled={!helps.doubleScore || lockedAnswer || doubleScoreActive}
-          onClick={() => onUseHelp(HELP_DOUBLE_SCORE)}
+          onClick={() => onUseHelp(Lifeline.DOUBLE_SCORE)}
           type="button"
         >
           X2

@@ -1,29 +1,15 @@
 "use client";
 
 import { useMemo } from "react";
-import { cx, rideFor } from "@/lib/race";
+import { cx } from "@/lib/classNames";
+import { sortPlayersByScore } from "@/lib/race";
+import { rideFor } from "@/lib/vehicles";
 import styles from "./final_leaderboard_page.module.css";
 
 const PODIUM_ORDER = [1, 0, 2];
 
-function scoreValue(player) {
-  return Number(player?.score) || 0;
-}
-
-function sortedPlayers(leaderboard) {
-  return [...(leaderboard || [])].sort((first, second) => {
-    const scoreDelta = scoreValue(second) - scoreValue(first);
-
-    if (scoreDelta !== 0) {
-      return scoreDelta;
-    }
-
-    return String(first?.name || "").localeCompare(String(second?.name || ""));
-  });
-}
-
 function formatScore(score) {
-  return scoreValue({ score }).toLocaleString("en-US");
+  return (Number(score) || 0).toLocaleString("en-US");
 }
 
 function playerKey(player, rank) {
@@ -31,7 +17,7 @@ function playerKey(player, rank) {
 }
 
 export default function FinalLeaderboardPage({ leaderboard, onBackToLobby }) {
-  const players = useMemo(() => sortedPlayers(leaderboard), [leaderboard]);
+  const players = useMemo(() => sortPlayersByScore(leaderboard), [leaderboard]);
   const podiumPlayers = PODIUM_ORDER.map((playerIndex) => ({
     player: players[playerIndex],
     rank: playerIndex + 1,
