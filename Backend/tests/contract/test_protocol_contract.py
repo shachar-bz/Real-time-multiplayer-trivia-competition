@@ -7,72 +7,55 @@ events. If it fails, fix the server, not the baseline.
 """
 
 import asyncio
+import csv
 import json
-import sqlite3
 from pathlib import Path
 
 import pytest
 from aiohttp import web
 
 from tests.contract import protocol_driver as driver
+from trivia.app import create_app
+from trivia.config import Settings
+from trivia.domain.bots import DifficultyProfile
 
 BASELINE = json.loads(Path(__file__).with_name("protocol_baseline.json").read_text())
 
 
-def build_original_app(workdir: Path) -> web.Application:
-    """Import the original module-level server with contract timings and test doubles."""
+class FakeFriend:
+    async def advise(self, question, confidence):
+        await asyncio.sleep(driver.FRIEND_DELAY_SECONDS)
+        return "fake friend says C"
+
+
+def build_app(workdir: Path) -> web.Application:
+    """The real app with contract timings, fast always-correct bots and a fake friend.
+
+    The question database does not exist yet: the app builds it from the CSV on
+    startup, exactly like on a fresh clone.
+    """
     sounds_dir = workdir / "sounds"
     sounds_dir.mkdir()
     (sounds_dir / "win_game.mp3").write_bytes(b"ID3")
 
-    question_db = workdir / "trivia.db"
-    with sqlite3.connect(question_db) as connection:
-        connection.execute(
-            """
-            CREATE TABLE questions (
-                id INTEGER PRIMARY KEY, topic TEXT, difficulty INTEGER, question TEXT,
-                option_a TEXT, option_b TEXT, option_c TEXT, option_d TEXT, correct_option TEXT
-            )
-            """
-        )
-        connection.executemany(
-            "INSERT INTO questions VALUES (:id, :topic, :difficulty, :question, "
-            ":option_a, :option_b, :option_c, :option_d, :correct_option)",
-            driver.CONTRACT_QUESTIONS,
-        )
+    questions_csv = workdir / "questions.csv"
+    with questions_csv.open("w", newline="", encoding="utf-8") as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=list(driver.CONTRACT_QUESTIONS[0]))
+        writer.writeheader()
+        writer.writerows(driver.CONTRACT_QUESTIONS)
 
-    import sound_events
-
-    sound_events.SOUNDS_DIR = sounds_dir
-
-    import chat
-    import chat_db
-
-    chat_db.CHAT_DB_PATH = workdir / "chat.db"
-    chat_db.init_chat_db()
-    chat.CHAT_DB_PATH = chat_db.CHAT_DB_PATH
-
-    import bot
-
-    for level in bot.DIFFICULTY_SETTINGS.values():
-        level["accuracy"] = 1.0
-        level["delay_min"], level["delay_max"] = driver.BOT_DELAY_SECONDS
-
-    import server
-
-    server.DB_PATH = question_db
-    server.MATCHMAKING_SECONDS = driver.MATCHMAKING_SECONDS
-    server.QUESTION_SECONDS = driver.QUESTION_SECONDS
-    server.QUESTIONS_PER_GAME = driver.QUESTIONS_PER_GAME
-    server.RESULT_SECONDS = driver.RESULT_SECONDS
-    server.RACE_FINISH_SCORE = (driver.QUESTIONS_PER_GAME + 1) * server.MAX_SCORE_PER_QUESTION
-
-    async def fake_friend(question, confidence):
-        await asyncio.sleep(driver.FRIEND_DELAY_SECONDS)
-        return "fake friend says C"
-
-    server.call_a_friend = fake_friend
-    return server.app
+    settings = Settings(
+        question_db_path=workdir / "data" / "trivia.db",
+        questions_csv_path=questions_csv,
+        chat_db_path=workdir / "data" / "chat.db",
+        sounds_dir=sounds_dir,
+        matchmaking_seconds=driver.MATCHMAKING_SECONDS,
+        question_seconds=driver.QUESTION_SECONDS,
+        questions_per_game=driver.QUESTIONS_PER_GAME,
+        result_seconds=driver.RESULT_SECONDS,
+    )
+    fast_bots = (DifficultyProfile("contract", 1.0, *driver.BOT_DELAY_SECONDS),)
+    return create_app(settings, friend_advisor=FakeFriend(), bot_profiles=fast_bots)
 
 
 async def serve_and_record(app: web.Application) -> driver.ProtocolRecording:
@@ -89,7 +72,7 @@ async def serve_and_record(app: web.Application) -> driver.ProtocolRecording:
 
 @pytest.fixture(scope="module")
 def recording(tmp_path_factory) -> driver.ProtocolRecording:
-    app = build_original_app(tmp_path_factory.mktemp("contract"))
+    app = build_app(tmp_path_factory.mktemp("contract"))
     return asyncio.run(serve_and_record(app))
 
 
@@ -99,7 +82,7 @@ def test_emits_exactly_the_baseline_event_names(recording):
 
 @pytest.mark.parametrize("event", sorted(BASELINE["events"]))
 def test_event_payload_shapes_match_baseline(recording, event):
-    expected = {json.dumps(payload_shape, sort_keys=True) for payload_shape in BASELINE["events"][event]}
+    expected = {json.dumps(shape, sort_keys=True) for shape in BASELINE["events"][event]}
     assert recording.shapes[event] == expected
 
 

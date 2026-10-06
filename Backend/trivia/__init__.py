@@ -16,3 +16,9 @@ The code is split into layers, and dependencies only point one way:
 `trivia.app.create_app` is the composition root that wires them together.
 """
 
+
+def main() -> None:
+    """Run the server (`python server.py` or `python -m trivia`)."""
+    from trivia.app import run_server
+
+    run_server()
