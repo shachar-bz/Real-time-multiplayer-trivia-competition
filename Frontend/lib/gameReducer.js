@@ -156,8 +156,13 @@ export function gameReducer(state, action) {
     case ActionType.SOCKET_DISCONNECTED:
       return { ...state, connectionStatus: "Disconnected" };
 
+    // The clock ticks four times a second but the display counts whole seconds,
+    // so keep the same state object when the second has not changed and let
+    // React skip the render.
     case ActionType.CLOCK_TICKED:
-      return { ...state, timeLeft: action.secondsLeft };
+      return action.secondsLeft === state.timeLeft
+        ? state
+        : { ...state, timeLeft: action.secondsLeft };
 
     // ---- server events ---------------------------------------------------
 

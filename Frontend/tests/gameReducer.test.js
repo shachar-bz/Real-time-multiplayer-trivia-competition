@@ -170,6 +170,11 @@ describe("socket lifecycle and clock", () => {
     const state = reduce(midGameState(), { type: ActionType.CLOCK_TICKED, secondsLeft: 9 });
     assert.equal(state.timeLeft, 9);
   });
+
+  test("a clock tick within the same second returns the same state object", () => {
+    const state = midGameState({ timeLeft: 9 });
+    assert.equal(gameReducer(state, { type: ActionType.CLOCK_TICKED, secondsLeft: 9 }), state);
+  });
 });
 
 describe("server events", () => {
