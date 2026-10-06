@@ -20,6 +20,7 @@ To use a server somewhere else, `cp .env.example .env` and set
 | `npm run build` | Production build                                  |
 | `npm start`     | Serve the production build on port 8081           |
 | `npm test`      | Unit tests for `lib/` with `node:test` (no extra dependencies) |
+| `npm run lint`  | ESLint with Next.js' core-web-vitals rules        |
 
 ## How it fits together
 
