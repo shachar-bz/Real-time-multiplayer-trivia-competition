@@ -19,6 +19,7 @@ function scoreLabel(score) {
   return `${safeScore} pt${safeScore === 1 ? "" : "s"}`;
 }
 
+/** After each question: the correct answer, your points, and every racer driving forward. */
 export default function RoundResult({
   currentPlayerId,
   leaderboard,

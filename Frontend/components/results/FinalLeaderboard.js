@@ -16,6 +16,7 @@ function playerKey(player, rank) {
   return player?.id || `${player?.name || "racer"}-${rank}`;
 }
 
+/** End of the race: the podium for the top three and the rest of the standings. */
 export default function FinalLeaderboard({ leaderboard, onBackToLobby }) {
   const players = useMemo(() => sortPlayersByScore(leaderboard), [leaderboard]);
   const podiumPlayers = PODIUM_ORDER.map((playerIndex) => ({

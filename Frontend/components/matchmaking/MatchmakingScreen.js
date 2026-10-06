@@ -17,6 +17,7 @@ function profileListFromWaiting(waiting) {
   }));
 }
 
+/** The lobby: countdown to the start and the starting grid of racers found so far. */
 export default function MatchmakingScreen({
   currentPlayerId,
   errorMessage,

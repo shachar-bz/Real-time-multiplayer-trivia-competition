@@ -9,6 +9,7 @@ const DEFAULT_PAINT_BY_RIDE = RIDES.reduce((paintMap, ride) => {
   return paintMap;
 }, {});
 
+/** First screen: racer name, ride and paint, then Start Race. */
 export default function WelcomeScreen({
   errorMessage,
   onPlayerNameChange,
