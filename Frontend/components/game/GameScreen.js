@@ -1,16 +1,16 @@
 "use client";
 
 import { useMemo } from "react";
-import FinalLeaderboardPage from "./final_leaderboard_page";
-import ResultPage from "./result_page";
+import FinalLeaderboard from "@/components/results/FinalLeaderboard";
+import RoundResult from "@/components/results/RoundResult";
 import { cx } from "@/lib/classNames";
 import { Lifeline } from "@/lib/protocol";
 import { paintFor, rideFor } from "@/lib/vehicles";
-import styles from "./game_page.module.css";
+import styles from "./GameScreen.module.css";
 
 const FIXED_LANE_COUNT = 3;
 
-export default function GamePage({
+export default function GameScreen({
   chatInput,
   chatListRef,
   chatMessages,
@@ -94,7 +94,7 @@ export default function GamePage({
       )}
 
       {phase === "result" && result && (
-        <ResultPage
+        <RoundResult
           currentPlayerId={currentPlayerId}
           leaderboard={leaderboard}
           myResult={myResult}
@@ -105,7 +105,7 @@ export default function GamePage({
       )}
 
       {phase === "finished" && (
-        <FinalLeaderboardPage leaderboard={leaderboard} onBackToLobby={onPlayAgain} />
+        <FinalLeaderboard leaderboard={leaderboard} onBackToLobby={onPlayAgain} />
       )}
 
       {errorMessage && <p className={styles.error}>{errorMessage}</p>}

@@ -1,8 +1,8 @@
 "use client";
 
-import GamePage from "./game_page";
-import MatchmakingPage from "./matchmaking_page";
-import WelcomePage from "./welcome_page";
+import GameScreen from "@/components/game/GameScreen";
+import MatchmakingScreen from "@/components/matchmaking/MatchmakingScreen";
+import WelcomeScreen from "@/components/welcome/WelcomeScreen";
 import { Phase } from "@/lib/gameReducer";
 import { useTriviaGame } from "@/hooks/useTriviaGame";
 
@@ -12,7 +12,7 @@ export default function Home() {
 
   if (state.phase === Phase.INTRO) {
     return (
-      <WelcomePage
+      <WelcomeScreen
         errorMessage={state.errorMessage}
         onPlayerNameChange={actions.setPlayerName}
         onStart={actions.joinQueue}
@@ -24,7 +24,7 @@ export default function Home() {
 
   if (state.phase === Phase.WAITING) {
     return (
-      <MatchmakingPage
+      <MatchmakingScreen
         currentPlayerId={state.currentPlayerId}
         errorMessage={state.errorMessage}
         matchmakingSeconds={state.config.matchmakingSeconds}
@@ -35,7 +35,7 @@ export default function Home() {
   }
 
   return (
-    <GamePage
+    <GameScreen
       chatInput={state.chatInput}
       chatListRef={chatListRef}
       chatMessages={state.chatMessages}

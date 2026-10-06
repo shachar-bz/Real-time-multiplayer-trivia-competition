@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { cx } from "@/lib/classNames";
 import { playersByScore, progressFor } from "@/lib/race";
 import { paintFor, rideFor } from "@/lib/vehicles";
-import styles from "./game_page.module.css";
+import styles from "@/components/game/GameScreen.module.css";
 
 function previousPlayerFor(player, previousPlayersById) {
   return previousPlayersById.get(player.id) || {
@@ -19,7 +19,7 @@ function scoreLabel(score) {
   return `${safeScore} pt${safeScore === 1 ? "" : "s"}`;
 }
 
-export default function ResultPage({
+export default function RoundResult({
   currentPlayerId,
   leaderboard,
   myResult,

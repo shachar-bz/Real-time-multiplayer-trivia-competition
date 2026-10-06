@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { cx } from "@/lib/classNames";
 import { sortPlayersByScore } from "@/lib/race";
 import { rideFor } from "@/lib/vehicles";
-import styles from "./final_leaderboard_page.module.css";
+import styles from "./FinalLeaderboard.module.css";
 
 const PODIUM_ORDER = [1, 0, 2];
 
@@ -16,7 +16,7 @@ function playerKey(player, rank) {
   return player?.id || `${player?.name || "racer"}-${rank}`;
 }
 
-export default function FinalLeaderboardPage({ leaderboard, onBackToLobby }) {
+export default function FinalLeaderboard({ leaderboard, onBackToLobby }) {
   const players = useMemo(() => sortPlayersByScore(leaderboard), [leaderboard]);
   const podiumPlayers = PODIUM_ORDER.map((playerIndex) => ({
     player: players[playerIndex],

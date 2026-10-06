@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { paintFor, rideFor } from "@/lib/vehicles";
-import styles from "./matchmaking_page.module.css";
+import styles from "./MatchmakingScreen.module.css";
 
 const TARGET_GRID_SLOTS = 4;
 
@@ -17,7 +17,7 @@ function profileListFromWaiting(waiting) {
   }));
 }
 
-export default function MatchmakingPage({
+export default function MatchmakingScreen({
   currentPlayerId,
   errorMessage,
   matchmakingSeconds = 30,

@@ -2,14 +2,14 @@
 
 import { useMemo, useRef, useState } from "react";
 import { PAINT_COLORS, RIDES } from "@/lib/vehicles";
-import styles from "./welcome_page.module.css";
+import styles from "./WelcomeScreen.module.css";
 
 const DEFAULT_PAINT_BY_RIDE = RIDES.reduce((paintMap, ride) => {
   paintMap[ride.id] = ride.defaultPaint;
   return paintMap;
 }, {});
 
-export default function WelcomePage({
+export default function WelcomeScreen({
   errorMessage,
   onPlayerNameChange,
   onStart,
