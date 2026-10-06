@@ -1,20 +1,27 @@
-import csv
+"""Step 1 of the question pipeline: generate new questions with an OpenAI model.
+
+Asks for NUM_OF_QUESTIONS questions per call, cycling through TOPICS, until
+TOTAL_QUESTIONS were appended to data/questions.csv. Needs OPENAI_API_KEY.
+
+    python -m tools.question_bank.generate_questions
+"""
+
 import json
 import os
 import time
-from pathlib import Path
 
 from dotenv import load_dotenv
 from openai import OpenAI
 
-BASE_DIR = Path(__file__).resolve().parent
+from tools.question_bank import csv_store
+from trivia.config import BACKEND_DIR
 
-load_dotenv(BASE_DIR / ".env")
+load_dotenv(BACKEND_DIR / ".env")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 NUM_OF_QUESTIONS = 10
 QUESTIONS_GENERATION_MODEL = "gpt-5.5"
 TOTAL_QUESTIONS = 20
-OUTPUT_FILE = BASE_DIR.parent / "data" / "questions.csv"
+OUTPUT_FILE = csv_store.QUESTIONS_CSV_PATH
 MAX_RETRIES = 2
 
 TOPICS = [
@@ -64,17 +71,6 @@ Rules:
 - Do not include text before or after the JSON.
 - Do not make the correct answer longer than the others on purpose"""
 
-CSV_FIELDS = [
-    "id",
-    "topic",
-    "difficulty",
-    "question",
-    "option_a",
-    "option_b",
-    "option_c",
-    "option_d",
-    "correct_option",
-]
 
 def build_prompt(topic: str, num_of_questions: int) -> str:
     return PROMPT_TEMPLATE.format(topic=topic, num_of_questions=num_of_questions)
@@ -134,23 +130,6 @@ def validate_question(raw_question: dict, topic: str, question_id: int) -> dict:
     }
 
 
-def get_next_question_id(output_path: Path) -> int:
-    if not output_path.exists():
-        return 1
-
-    with output_path.open("r", newline="", encoding="utf-8") as csv_file:
-        reader = csv.DictReader(csv_file)
-        existing_ids = [
-            int(row["id"])
-            for row in reader
-            if row.get("id") and row["id"].isdigit()
-        ]
-
-    if not existing_ids:
-        return 1
-    return max(existing_ids) + 1
-
-
 def generate_questions(
     client: OpenAI,
     model: str,
@@ -158,43 +137,36 @@ def generate_questions(
     num_of_questions: int,
     max_retries: int,
 ) -> None:
-    output_path = Path(OUTPUT_FILE)
-    file_exists = output_path.exists()
-    next_question_id = get_next_question_id(output_path)
+    next_question_id = csv_store.next_question_id(OUTPUT_FILE)
     generated_count = 0
     topic_index = 0
 
-    with output_path.open("a", newline="", encoding="utf-8") as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=CSV_FIELDS)
-        if not file_exists:
-            writer.writeheader()
+    while generated_count < total_questions:
+        topic = TOPICS[topic_index % len(TOPICS)]
+        remaining = total_questions - generated_count
+        batch_size = min(num_of_questions, remaining)
+        print(f"Generating {batch_size} questions for {topic}...")
 
-        while generated_count < total_questions:
-            topic = TOPICS[topic_index % len(TOPICS)]
-            remaining = total_questions - generated_count
-            batch_size = min(num_of_questions, remaining)
-            print(f"Generating {batch_size} questions for {topic}...")
+        data = call_openai(client, model, topic, batch_size, max_retries)
+        batch = data.get("questions", [])
 
-            data = call_openai(client, model, topic, batch_size, max_retries)
-            batch = data.get("questions", [])
+        if len(batch) != batch_size:
+            raise ValueError(
+                f"Expected {batch_size} questions for {topic}, got {len(batch)}."
+            )
 
-            if len(batch) != batch_size:
-                raise ValueError(
-                    f"Expected {batch_size} questions for {topic}, got {len(batch)}."
-                )
+        rows = []
+        for raw_question in batch:
+            row = validate_question(raw_question, topic, next_question_id)
+            rows.append(row)
+            next_question_id += 1
+            generated_count += 1
 
-            rows = []
-            for raw_question in batch:
-                row = validate_question(raw_question, topic, next_question_id)
-                rows.append(row)
-                next_question_id += 1
-                generated_count += 1
+        # Saved batch by batch, so a failure later on keeps what was generated.
+        csv_store.append_questions(rows, OUTPUT_FILE)
+        print(f"Stored {generated_count} questions in {OUTPUT_FILE}")
 
-            writer.writerows(rows)
-            csv_file.flush()
-            print(f"Stored {generated_count} questions in {OUTPUT_FILE}")
-
-            topic_index += 1
+        topic_index += 1
 
 
 def main() -> None:

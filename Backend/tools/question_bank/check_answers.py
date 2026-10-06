@@ -1,18 +1,27 @@
-import csv
+"""Step 2 of the question pipeline: drop questions whose answer key looks wrong.
+
+Other models (free ones, through OpenRouter) answer every question in batches
+of QUESTIONS_PER_CALL. When a model disagrees with `correct_option`, the
+question is either wrong or too ambiguous for a race, so it is deleted from
+data/questions.csv and the remaining ids are renumbered. Needs OPENROUTER_API_KEY.
+
+    python -m tools.question_bank.check_answers
+"""
+
 import os
 import re
 import time
-from pathlib import Path
 
 from dotenv import load_dotenv
 from openai import OpenAI
 
-BASE_DIR = Path(__file__).resolve().parent
+from tools.question_bank import csv_store
+from trivia.config import BACKEND_DIR
 
-load_dotenv(BASE_DIR / ".env")
+load_dotenv(BACKEND_DIR / ".env")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-QUESTIONS_FILE = BASE_DIR.parent / "data" / "questions.csv"
+QUESTIONS_FILE = csv_store.QUESTIONS_CSV_PATH
 QUESTIONS_PER_CALL = 8
 MAX_RETRIES = 2
 
@@ -40,18 +49,6 @@ Rules:
 - If you are unsure, choose the most likely correct answer.
 
 Because there are multiple questions, return one answer per line in the same order as the questions."""
-
-
-def load_questions(csv_path: Path) -> tuple[list[dict], list[str]]:
-    with csv_path.open("r", newline="", encoding="utf-8") as csv_file:
-        reader = csv.DictReader(csv_file)
-        fieldnames = reader.fieldnames
-        rows = list(reader)
-
-    if not fieldnames:
-        raise ValueError(f"{csv_path} does not contain a CSV header.")
-
-    return rows, fieldnames
 
 
 def chunk_questions(questions: list[dict], chunk_size: int) -> list[list[dict]]:
@@ -153,32 +150,7 @@ def get_wrong_question_ids(questions: list[dict], model_answers: list[str]) -> l
     return wrong_question_ids
 
 
-def delete_question(
-    ids_to_delete: list[int],
-    fieldnames: list[str],
-    questions: list[dict],
-    csv_file_name: str | Path = QUESTIONS_FILE,
-) -> None:
-    if not ids_to_delete:
-        return
-
-    ids_to_delete_set = {str(question_id) for question_id in ids_to_delete}
-    rows_to_keep = [
-        question
-        for question in questions
-        if question.get("id") not in ids_to_delete_set
-    ]
-
-    for question_id, question in enumerate(rows_to_keep, start=1):
-        question["id"] = question_id
-
-    with Path(csv_file_name).open("w", newline="", encoding="utf-8") as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows_to_keep)
-
-
-def check_questions() -> None:
+def check_answers() -> None:
     if not OPENROUTER_API_KEY:
         raise RuntimeError("Missing OPENROUTER_API_KEY in .env file.")
 
@@ -190,7 +162,7 @@ def check_questions() -> None:
         api_key=OPENROUTER_API_KEY,
         base_url=OPENROUTER_BASE_URL,
     )
-    questions, fieldnames = load_questions(csv_path)
+    questions, _ = csv_store.read_questions(csv_path)
     all_ids_to_delete = []
 
     for call_index, question_batch in enumerate(chunk_questions(questions, QUESTIONS_PER_CALL)):
@@ -205,9 +177,9 @@ def check_questions() -> None:
         all_ids_to_delete.extend(get_wrong_question_ids(question_batch, model_answers))
 
     unique_ids_to_delete = sorted(set(all_ids_to_delete))
-    delete_question(unique_ids_to_delete, fieldnames, questions)
+    csv_store.delete_questions(unique_ids_to_delete, csv_path)
     print(f"Deleted {len(unique_ids_to_delete)} difficult questions from {QUESTIONS_FILE}.")
 
 
 if __name__ == "__main__":
-    check_questions()
+    check_answers()

@@ -1,4 +1,12 @@
-import csv
+"""Step 3 of the question pipeline: delete questions that ask the same thing twice.
+
+For each topic an OpenAI model groups questions that ask for the same
+information. The first id of every group stays; the others are deleted from
+data/questions.csv and the remaining ids are renumbered. Needs OPENAI_API_KEY.
+
+    python -m tools.question_bank.dedupe_questions
+"""
+
 import json
 import os
 import time
@@ -7,12 +15,13 @@ from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
 
-BASE_DIR = Path(__file__).resolve().parent
+from tools.question_bank import csv_store
+from trivia.config import BACKEND_DIR
 
-load_dotenv(BASE_DIR / ".env")
+load_dotenv(BACKEND_DIR / ".env")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 REPETITIVE_RECOGNIZER_MODEL = "gpt-5.4"
-QUESTIONS_FILE = BASE_DIR.parent / "data" / "questions.csv"
+QUESTIONS_FILE = csv_store.QUESTIONS_CSV_PATH
 MAX_RETRIES = 2
 
 DEDUPE_PROMPT = """YOU are an expert data analyst specializing in semantic deduplication. You will be provided with a list of trivia questions from a single topic, where each entry is a pair consisting of a unique id and the question text.
@@ -37,23 +46,22 @@ Output Structure:
 
 def load_questions_by_topic(csv_path: Path) -> dict[str, list[dict]]:
     questions_by_topic = {}
+    rows, _ = csv_store.read_questions(csv_path)
 
-    with csv_path.open("r", newline="", encoding="utf-8") as csv_file:
-        reader = csv.DictReader(csv_file)
-        for row in reader:
-            question_id = row.get("id")
-            topic = row.get("topic")
-            question = row.get("question")
+    for row in rows:
+        question_id = row.get("id")
+        topic = row.get("topic")
+        question = row.get("question")
 
-            if not question_id or not topic or not question:
-                continue
+        if not question_id or not topic or not question:
+            continue
 
-            questions_by_topic.setdefault(topic, []).append(
-                {
-                    "id": int(question_id),
-                    "question": question,
-                }
-            )
+        questions_by_topic.setdefault(topic, []).append(
+            {
+                "id": int(question_id),
+                "question": question,
+            }
+        )
 
     return questions_by_topic
 
@@ -89,6 +97,7 @@ def call_repetitive_recognizer(
 
 
 def get_ids_to_delete(llm_output: dict) -> list[int]:
+    """Every id of a repetitive group except the first one, which is kept."""
     ids_to_delete = []
 
     for group_ids in llm_output.values():
@@ -109,35 +118,7 @@ def print_deleted_questions(ids_to_delete: list[int], questions: list[dict]) -> 
             print(f'Deleted question {question["id"]}: {question["question"]}')
 
 
-def delete_question(ids_to_delete: list[int], csv_file_name: str | Path = QUESTIONS_FILE) -> None:
-    if not ids_to_delete:
-        return
-
-    csv_path = Path(csv_file_name)
-    ids_to_delete_set = {str(question_id) for question_id in ids_to_delete}
-
-    with csv_path.open("r", newline="", encoding="utf-8") as csv_file:
-        reader = csv.DictReader(csv_file)
-        fieldnames = reader.fieldnames
-        rows_to_keep = []
-
-        for row in reader:
-            if row.get("id") not in ids_to_delete_set:
-                rows_to_keep.append(row)
-
-    if not fieldnames:
-        raise ValueError(f"{csv_file_name} does not contain a CSV header.")
-
-    for question_id, row in enumerate(rows_to_keep, start=1):
-        row["id"] = question_id
-
-    with csv_path.open("w", newline="", encoding="utf-8") as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows_to_keep)
-
-
-def delete_repetitive_questions() -> None:
+def dedupe_questions() -> None:
     if not OPENAI_API_KEY:
         raise RuntimeError("Missing OPENAI_API_KEY in .env file.")
 
@@ -166,9 +147,9 @@ def delete_repetitive_questions() -> None:
         all_ids_to_delete.extend(topic_ids_to_delete)
 
     unique_ids_to_delete = sorted(set(all_ids_to_delete))
-    delete_question(unique_ids_to_delete)
+    csv_store.delete_questions(unique_ids_to_delete, csv_path)
     print(f"Deleted {len(unique_ids_to_delete)} repetitive questions from {QUESTIONS_FILE}.")
 
 
 if __name__ == "__main__":
-    delete_repetitive_questions()
+    dedupe_questions()
