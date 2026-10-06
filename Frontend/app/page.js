@@ -13,20 +13,10 @@ import {
   SERVER_URL,
 } from "@/lib/config";
 import { ClientEvent, Lifeline, ServerEvent } from "@/lib/protocol";
+import { roundResultSound } from "@/lib/sounds";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 
-const SOUND_EFFECTS = {
-  click: "/sounds/click.mp3",
-  correct_answer: "/sounds/correct_answer.mp3",
-  wrong_answer: "/sounds/wrong_answer.mp3",
-  win_game: "/sounds/win_game.mp3",
-  submit_answer: "/sounds/submit_answer.mp3",
-  click_possible_answer: "/sounds/click_possible_answer.mp3",
-  call_friend: "/sounds/call_friend.mp3",
-  ticking_clock: "/sounds/ticking_clock.mp3",
-  game_countdown: "/sounds/game_countdown.mp3",
-  no_answer: "/sounds/no_answer.mp3",
-};
 const EMPTY_RACE_STANDINGS = {
   finishScore: 0,
   players: [],
@@ -35,8 +25,8 @@ const EMPTY_RACE_STANDINGS = {
 
 export default function Home() {
   const socketRef = useRef(null);
-  const soundRefs = useRef({});
-  const activeSoundRefs = useRef({});
+  const { playSoundEffect, playManagedSound, stopManagedSound, primeSoundEffects } =
+    useSoundEffects();
   const gameCountdownPlayedRef = useRef(false);
   const settledRaceStandingsRef = useRef(EMPTY_RACE_STANDINGS);
   const chatListRef = useRef(null);
@@ -99,98 +89,7 @@ export default function Home() {
     chatOpenRef.current = chatOpen;
   }, [chatOpen]);
 
-  const ensureSoundAudio = useCallback((name, soundUrl = SOUND_EFFECTS[name]) => {
-    if (!soundUrl) {
-      return null;
-    }
-
-    const absoluteUrl = new URL(soundUrl, SERVER_URL).toString();
-    let audio = soundRefs.current[name];
-    if (!audio || audio.src !== absoluteUrl) {
-      audio = new Audio(absoluteUrl);
-      audio.preload = "auto";
-      soundRefs.current[name] = audio;
-    }
-
-    return audio;
-  }, []);
-
-  const playSoundEffect = useCallback(
-    (sound) => {
-      const name = sound?.name;
-      if (!name) {
-        return;
-      }
-
-      const audio = ensureSoundAudio(name, sound.url || SOUND_EFFECTS[name]);
-      if (!audio) {
-        return;
-      }
-
-      const playback = audio.cloneNode();
-      playback.currentTime = 0;
-      playback.play().catch(() => {});
-    },
-    [ensureSoundAudio]
-  );
-
-  const playManagedSound = useCallback(
-    (name, options = {}) => {
-      const audio = ensureSoundAudio(name);
-      if (!audio) {
-        return;
-      }
-
-      audio.pause();
-      audio.currentTime = 0;
-      audio.loop = Boolean(options.loop);
-      activeSoundRefs.current[name] = audio;
-      audio.play().catch(() => {});
-    },
-    [ensureSoundAudio]
-  );
-
-  const stopManagedSound = useCallback((name) => {
-    const audio = activeSoundRefs.current[name];
-    if (!audio) {
-      return;
-    }
-
-    audio.pause();
-    audio.currentTime = 0;
-    audio.loop = false;
-    delete activeSoundRefs.current[name];
-  }, []);
-
-  const primeSoundEffects = useCallback(() => {
-    Object.keys(SOUND_EFFECTS).forEach((name) => {
-      const audio = ensureSoundAudio(name);
-      if (!audio) {
-        return;
-      }
-
-      audio.muted = true;
-      const resetAudio = () => {
-        audio.pause();
-        audio.currentTime = 0;
-        audio.muted = false;
-      };
-      const playPromise = audio.play();
-      if (playPromise) {
-        playPromise.then(resetAudio).catch(() => {
-          audio.muted = false;
-        });
-      } else {
-        resetAudio();
-      }
-    });
-  }, [ensureSoundAudio]);
-
   useEffect(() => {
-    Object.keys(SOUND_EFFECTS).forEach((name) => {
-      ensureSoundAudio(name);
-    });
-
     const socket = io(SERVER_URL, {
       autoConnect: true,
       transports: ["websocket", "polling"],
@@ -319,16 +218,7 @@ export default function Home() {
       settledRaceStandingsRef.current = nextRaceStandings;
       setQuestionEndsAt(null);
       setTimeLeft(0);
-      const currentPlayerResult = questionResult.answers.find(
-        (answer) => answer.playerId === socket.id
-      );
-      if (!currentPlayerResult?.selectedOption) {
-        playSoundEffect({ name: "no_answer" });
-      } else {
-        playSoundEffect({
-          name: currentPlayerResult.isCorrect ? "correct_answer" : "wrong_answer",
-        });
-      }
+      playSoundEffect({ name: roundResultSound(questionResult, socket.id) });
     });
     socket.on(ServerEvent.HELP_USED, (helpResult) => {
       setHelps(helpResult.helps);
@@ -445,7 +335,6 @@ export default function Home() {
       socket.disconnect();
     };
   }, [
-    ensureSoundAudio,
     playManagedSound,
     playSoundEffect,
     scrollChatToBottom,
@@ -592,6 +481,7 @@ export default function Home() {
         errorMessage={errorMessage}
         onPlayerNameChange={setPlayerName}
         onStart={joinQueue}
+        playClickSound={() => playSoundEffect({ name: "click" })}
         playerName={playerName}
       />
     );

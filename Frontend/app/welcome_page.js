@@ -1,10 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { PAINT_COLORS, RIDES } from "@/lib/vehicles";
 import styles from "./welcome_page.module.css";
-
-const CLICK_SOUND_URL = "http://localhost:8080/sounds/click.mp3";
 
 const DEFAULT_PAINT_BY_RIDE = RIDES.reduce((paintMap, ride) => {
   paintMap[ride.id] = ride.defaultPaint;
@@ -15,12 +13,12 @@ export default function WelcomePage({
   errorMessage,
   onPlayerNameChange,
   onStart,
+  playClickSound,
   playerName,
 }) {
   const [selectedRideId, setSelectedRideId] = useState("monster-truck");
   const [paintByRide, setPaintByRide] = useState(DEFAULT_PAINT_BY_RIDE);
   const [nameError, setNameError] = useState("");
-  const clickSoundRef = useRef(null);
   const playerNameInputRef = useRef(null);
 
   const selectedRide = useMemo(
@@ -32,19 +30,8 @@ export default function WelcomePage({
     [paintByRide, selectedRide.id]
   );
 
-  const playLocalClickSound = useCallback(() => {
-    if (!clickSoundRef.current) {
-      clickSoundRef.current = new Audio(CLICK_SOUND_URL);
-      clickSoundRef.current.preload = "auto";
-    }
-
-    const clickSound = clickSoundRef.current.cloneNode();
-    clickSound.currentTime = 0;
-    clickSound.play().catch(() => {});
-  }, []);
-
   function choosePaint(rideId, paintId) {
-    playLocalClickSound();
+    playClickSound();
     setPaintByRide((currentPaints) => ({
       ...currentPaints,
       [rideId]: paintId,
@@ -52,7 +39,7 @@ export default function WelcomePage({
   }
 
   function chooseRide(rideId) {
-    playLocalClickSound();
+    playClickSound();
     setSelectedRideId(rideId);
   }
 
@@ -65,7 +52,7 @@ export default function WelcomePage({
   }
 
   function startRace(event) {
-    playLocalClickSound();
+    playClickSound();
     if (!playerName.trim()) {
       setNameError("Username is required to start the game.");
       playerNameInputRef.current?.scrollIntoView({
@@ -98,7 +85,7 @@ export default function WelcomePage({
             className={styles.nameInput}
             id="playerName"
             maxLength={24}
-            onClick={playLocalClickSound}
+            onClick={playClickSound}
             onChange={(event) => updatePlayerName(event.target.value)}
             placeholder="TYPE YOUR NAME"
             ref={playerNameInputRef}
