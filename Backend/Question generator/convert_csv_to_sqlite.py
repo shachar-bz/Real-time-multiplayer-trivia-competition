@@ -5,7 +5,7 @@ from pathlib import Path
 # Paths
 BASE_DIR = Path(__file__).resolve().parent
 BACKEND_DIR = BASE_DIR.parent
-CSV_PATH = BASE_DIR / "questions.csv"
+CSV_PATH = BACKEND_DIR / "data" / "questions.csv"
 DB_PATH = BACKEND_DIR / "trivia.db"
 
 # Table schema

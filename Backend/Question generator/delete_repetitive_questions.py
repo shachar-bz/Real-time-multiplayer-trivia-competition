@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 REPETITIVE_RECOGNIZER_MODEL = "gpt-5.4"
-QUESTIONS_FILE = BASE_DIR / "questions.csv"
+QUESTIONS_FILE = BASE_DIR.parent / "data" / "questions.csv"
 MAX_RETRIES = 2
 
 DEDUPE_PROMPT = """YOU are an expert data analyst specializing in semantic deduplication. You will be provided with a list of trivia questions from a single topic, where each entry is a pair consisting of a unique id and the question text.

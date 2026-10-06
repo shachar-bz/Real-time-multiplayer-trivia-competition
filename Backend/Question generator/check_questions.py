@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-QUESTIONS_FILE = BASE_DIR / "questions.csv"
+QUESTIONS_FILE = BASE_DIR.parent / "data" / "questions.csv"
 QUESTIONS_PER_CALL = 8
 MAX_RETRIES = 2
 

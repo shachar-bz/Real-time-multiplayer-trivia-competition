@@ -14,7 +14,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 NUM_OF_QUESTIONS = 10
 QUESTIONS_GENERATION_MODEL = "gpt-5.5"
 TOTAL_QUESTIONS = 20
-OUTPUT_FILE = BASE_DIR / "questions.csv"
+OUTPUT_FILE = BASE_DIR.parent / "data" / "questions.csv"
 MAX_RETRIES = 2
 
 TOPICS = [
