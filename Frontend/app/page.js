@@ -1,81 +1,35 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 import { io } from "socket.io-client";
 import GamePage from "./game_page";
 import MatchmakingPage from "./matchmaking_page";
 import WelcomePage from "./welcome_page";
+import { GAME_COUNTDOWN_SECONDS, SERVER_URL } from "@/lib/config";
 import {
-  DEFAULT_MATCHMAKING_SECONDS,
-  DEFAULT_QUESTIONS_PER_GAME,
-  DEFAULT_QUESTION_SECONDS,
-  GAME_COUNTDOWN_SECONDS,
-  SERVER_URL,
-} from "@/lib/config";
+  ActionType,
+  Phase,
+  canChooseAnswer,
+  canUseHelp,
+  gameReducer,
+  initialState,
+  secondsUntil,
+  selectRaceStandings,
+} from "@/lib/gameReducer";
 import { ClientEvent, Lifeline, ServerEvent } from "@/lib/protocol";
 import { roundResultSound } from "@/lib/sounds";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 
-const EMPTY_RACE_STANDINGS = {
-  finishScore: 0,
-  players: [],
-};
-
-
 export default function Home() {
-  const socketRef = useRef(null);
+  const [state, dispatch] = useReducer(gameReducer, initialState);
   const { playSoundEffect, playManagedSound, stopManagedSound, primeSoundEffects } =
     useSoundEffects();
+  const socketRef = useRef(null);
   const gameCountdownPlayedRef = useRef(false);
-  const settledRaceStandingsRef = useRef(EMPTY_RACE_STANDINGS);
   const chatListRef = useRef(null);
   const chatOpenRef = useRef(false);
-  const [phase, setPhase] = useState("intro");
-  const [connectionStatus, setConnectionStatus] = useState("Disconnected");
-  const [currentPlayerId, setCurrentPlayerId] = useState(null);
-  const [playerName, setPlayerName] = useState("");
-  const [config, setConfig] = useState({
-    matchmakingSeconds: DEFAULT_MATCHMAKING_SECONDS,
-    questionSeconds: DEFAULT_QUESTION_SECONDS,
-    questionsPerGame: DEFAULT_QUESTIONS_PER_GAME,
-  });
-  const [waiting, setWaiting] = useState({
-    secondsLeft: DEFAULT_MATCHMAKING_SECONDS,
-    playerCount: 0,
-    players: [],
-    playerProfiles: [],
-  });
-  const [gameInfo, setGameInfo] = useState(null);
-  const [question, setQuestion] = useState(null);
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [lockedAnswer, setLockedAnswer] = useState(false);
-  const [removedOptions, setRemovedOptions] = useState([]);
-  const [doubleScoreActive, setDoubleScoreActive] = useState(false);
-  const [helps, setHelps] = useState({
-    fiftyFifty: true,
-    doubleScore: true,
-    callFriend: true,
-  });
-  const [friendPopup, setFriendPopup] = useState({
-    open: false,
-    loading: false,
-    message: "",
-    confidence: null,
-    friendAnswered: null,
-    kind: "",
-  });
-  const [timeLeft, setTimeLeft] = useState(DEFAULT_QUESTION_SECONDS);
-  const [questionEndsAt, setQuestionEndsAt] = useState(null);
-  const [result, setResult] = useState(null);
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [raceStandings, setRaceStandings] = useState(EMPTY_RACE_STANDINGS);
-  const [previousRaceStandings, setPreviousRaceStandings] = useState(EMPTY_RACE_STANDINGS);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [chatInput, setChatInput] = useState("");
-  const [chatUnreadCount, setChatUnreadCount] = useState(0);
+  const { chatOpen, phase, questionEndsAt } = state;
 
   const scrollChatToBottom = useCallback(() => {
     window.requestAnimationFrame(() => {
@@ -97,21 +51,19 @@ export default function Home() {
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      setConnectionStatus("Connected");
-      setCurrentPlayerId(socket.id);
+      dispatch({ type: ActionType.SOCKET_CONNECTED, socketId: socket.id });
     });
-    socket.on("disconnect", () => setConnectionStatus("Disconnected"));
-    socket.on(ServerEvent.CONNECTED, (serverConfig) => {
-      setCurrentPlayerId(serverConfig.sid);
-      setConfig({
-        matchmakingSeconds: serverConfig.matchmakingSeconds,
-        questionSeconds: serverConfig.questionSeconds,
-        questionsPerGame: serverConfig.questionsPerGame,
+    socket.on("disconnect", () => dispatch({ type: ActionType.SOCKET_DISCONNECTED }));
+
+    // Every server event updates the game state...
+    Object.values(ServerEvent).forEach((event) => {
+      socket.on(event, (payload) => {
+        dispatch({ type: event, payload, selfId: socket.id, now: Date.now() });
       });
     });
+
+    // ...and some also play or stop sounds, or scroll the chat.
     socket.on(ServerEvent.MATCHMAKING_STATUS, (status) => {
-      setPhase("waiting");
-      setWaiting(status);
       if (status.secondsLeft > GAME_COUNTDOWN_SECONDS) {
         gameCountdownPlayedRef.current = false;
       }
@@ -123,210 +75,46 @@ export default function Home() {
         playSoundEffect({ name: "game_countdown" });
       }
     });
-    socket.on(ServerEvent.GAME_STARTED, (info) => {
-      const startingRaceStandings = info.raceStandings || EMPTY_RACE_STANDINGS;
-
+    socket.on(ServerEvent.GAME_STARTED, () => {
       stopManagedSound("call_friend");
       stopManagedSound("ticking_clock");
-      setPhase("game");
-      setGameInfo(info);
-      setLeaderboard([]);
-      setRaceStandings(startingRaceStandings);
-      setPreviousRaceStandings(startingRaceStandings);
-      settledRaceStandingsRef.current = startingRaceStandings;
-      setResult(null);
-      setErrorMessage("");
-      setChatOpen(false);
-      setChatMessages([]);
-      setChatInput("");
-      setChatUnreadCount(0);
-      setHelps({
-        fiftyFifty: true,
-        doubleScore: true,
-        callFriend: true,
-      });
-      setFriendPopup({
-        open: false,
-        loading: false,
-        message: "",
-        confidence: null,
-        friendAnswered: null,
-        kind: "",
-      });
     });
-    socket.on(ServerEvent.PLAYER_STATE, (state) => {
-      setHelps(state.helps);
-    });
-    socket.on(ServerEvent.QUESTION, (nextQuestion) => {
+    socket.on(ServerEvent.QUESTION, () => {
       stopManagedSound("call_friend");
-      setPhase("game");
-      setQuestion(nextQuestion);
-      setSelectedOption(null);
-      setLockedAnswer(false);
-      setRemovedOptions([]);
-      setDoubleScoreActive(false);
-      setFriendPopup({
-        open: false,
-        loading: false,
-        message: "",
-        confidence: null,
-        friendAnswered: null,
-        kind: "",
-      });
-      setResult(null);
-      setTimeLeft(nextQuestion.seconds);
-      setQuestionEndsAt(Date.now() + nextQuestion.seconds * 1000);
-    });
-    socket.on(ServerEvent.ANSWER_RECEIVED, (answer) => {
-      setSelectedOption(answer.selectedOption);
-      setLockedAnswer(true);
     });
     socket.on(ServerEvent.SOUND_EFFECT, playSoundEffect);
-    socket.on(ServerEvent.CHAT_NEW_MESSAGE, (message) => {
-      const normalizedMessage = {
-        ...message,
-        is_own: message.is_own ?? message.user_id === socket.id,
-      };
-      setChatMessages((currentMessages) => [...currentMessages, normalizedMessage]);
+    socket.on(ServerEvent.CHAT_NEW_MESSAGE, () => {
       if (chatOpenRef.current) {
         scrollChatToBottom();
       }
     });
-    socket.on(ServerEvent.CHAT_HISTORY, (messages) => {
-      setChatMessages(messages);
+    socket.on(ServerEvent.CHAT_HISTORY, () => {
       scrollChatToBottom();
     });
-    socket.on(ServerEvent.CHAT_UNREAD_UPDATE, (update) => {
-      setChatUnreadCount(update.unread_count || 0);
-    });
-    socket.on(ServerEvent.CHAT_HISTORY_CLEARED, () => {
-      setChatMessages([]);
-      setChatUnreadCount(0);
-    });
-    socket.on(ServerEvent.RACE_STANDINGS, (standings) => {
-      setRaceStandings(standings || EMPTY_RACE_STANDINGS);
-    });
     socket.on(ServerEvent.QUESTION_RESULT, (questionResult) => {
-      const nextRaceStandings = questionResult.raceStandings || EMPTY_RACE_STANDINGS;
-
       stopManagedSound("ticking_clock");
-      setPhase("result");
-      setResult(questionResult);
-      setLeaderboard(questionResult.leaderboard);
-      setPreviousRaceStandings(settledRaceStandingsRef.current);
-      setRaceStandings(nextRaceStandings);
-      settledRaceStandingsRef.current = nextRaceStandings;
-      setQuestionEndsAt(null);
-      setTimeLeft(0);
       playSoundEffect({ name: roundResultSound(questionResult, socket.id) });
     });
     socket.on(ServerEvent.HELP_USED, (helpResult) => {
-      setHelps(helpResult.helps);
-      if (helpResult.helpType === Lifeline.FIFTY_FIFTY) {
-        setRemovedOptions(helpResult.removedOptions);
-      }
-      if (helpResult.helpType === Lifeline.DOUBLE_SCORE) {
-        setDoubleScoreActive(Boolean(helpResult.doubleScoreActive));
-      }
       if (helpResult.helpType === Lifeline.CALL_A_FRIEND) {
         stopManagedSound("call_friend");
-        setFriendPopup({
-          open: true,
-          loading: false,
-          message: helpResult.message,
-          confidence: helpResult.confidence,
-          friendAnswered: helpResult.friendAnswered,
-          kind: "result",
-        });
       }
     });
     socket.on(ServerEvent.QUESTION_TIMER_PAUSED, (pauseInfo) => {
       stopManagedSound("ticking_clock");
-      setTimeLeft(pauseInfo.secondsLeft);
-      setQuestionEndsAt(null);
       if (pauseInfo.callerId === socket.id) {
         playManagedSound("call_friend");
-        setFriendPopup({
-          open: true,
-          loading: true,
-          message: "Calling your funniest friend...",
-          confidence: null,
-          friendAnswered: null,
-          kind: "caller_loading",
-        });
-        return;
       }
-
-      setFriendPopup({
-        open: true,
-        loading: true,
-        message: "Someone is calling his friend.",
-        confidence: null,
-        friendAnswered: null,
-        kind: "observer_waiting",
-      });
     });
-    socket.on(ServerEvent.QUESTION_TIMER_RESUMED, (resumeInfo) => {
+    socket.on(ServerEvent.QUESTION_TIMER_RESUMED, () => {
       stopManagedSound("call_friend");
-      setTimeLeft(resumeInfo.secondsLeft);
-      setQuestionEndsAt(Date.now() + resumeInfo.secondsLeft * 1000);
-      setFriendPopup((currentPopup) => {
-        if (currentPopup.kind === "observer_waiting" || currentPopup.kind === "caller_loading") {
-          return {
-            open: false,
-            loading: false,
-            message: "",
-            confidence: null,
-            friendAnswered: null,
-            kind: "",
-          };
-        }
-
-        return currentPopup;
-      });
     });
-    socket.on(ServerEvent.GAME_FINISHED, (summary) => {
-      const finalRaceStandings = summary.raceStandings || EMPTY_RACE_STANDINGS;
-
+    socket.on(ServerEvent.GAME_FINISHED, () => {
       stopManagedSound("call_friend");
       stopManagedSound("ticking_clock");
-      setPhase("finished");
-      setLeaderboard(summary.leaderboard);
-      setPreviousRaceStandings(settledRaceStandingsRef.current);
-      setRaceStandings(finalRaceStandings);
-      settledRaceStandingsRef.current = finalRaceStandings;
-      setQuestion(null);
-      setResult(null);
-      setGameInfo(null);
-      setQuestionEndsAt(null);
-      setChatOpen(false);
-      setChatMessages([]);
-      setChatInput("");
-      setChatUnreadCount(0);
-      setFriendPopup({
-        open: false,
-        loading: false,
-        message: "",
-        confidence: null,
-        friendAnswered: null,
-        kind: "",
-      });
     });
-    socket.on(ServerEvent.ERROR_MESSAGE, (error) => {
+    socket.on(ServerEvent.ERROR_MESSAGE, () => {
       stopManagedSound("call_friend");
-      setErrorMessage(error.message);
-      setFriendPopup((currentPopup) =>
-        currentPopup.loading
-          ? {
-              open: false,
-              loading: false,
-              message: "",
-              confidence: null,
-              friendAnswered: null,
-              kind: "",
-            }
-          : currentPopup
-      );
     });
 
     return () => {
@@ -347,14 +135,17 @@ export default function Home() {
     }
 
     const timer = window.setInterval(() => {
-      setTimeLeft(Math.max(0, Math.ceil((questionEndsAt - Date.now()) / 1000)));
+      dispatch({
+        type: ActionType.CLOCK_TICKED,
+        secondsLeft: secondsUntil(questionEndsAt, Date.now()),
+      });
     }, 250);
 
     return () => window.clearInterval(timer);
   }, [questionEndsAt]);
 
   useEffect(() => {
-    if (phase !== "game" || !questionEndsAt) {
+    if (phase !== Phase.GAME || !questionEndsAt) {
       stopManagedSound("ticking_clock");
       return undefined;
     }
@@ -366,24 +157,9 @@ export default function Home() {
   function joinQueue(event, profile = {}) {
     event.preventDefault();
     primeSoundEffects();
-    const trimmedPlayerName = playerName.trim();
-    setErrorMessage("");
-    setPhase("waiting");
-    setWaiting({
-      secondsLeft: config.matchmakingSeconds,
-      playerCount: 1,
-      players: [trimmedPlayerName],
-      playerProfiles: [
-        {
-          id: socketRef.current?.id || currentPlayerId || "current-player",
-          name: trimmedPlayerName,
-          ride: profile.ride,
-          paint: profile.paint,
-        },
-      ],
-    });
+    dispatch({ type: ActionType.QUEUE_JOINED, profile, socketId: socketRef.current?.id });
     socketRef.current?.emit(ClientEvent.JOIN_QUEUE, {
-      name: playerName,
+      name: state.playerName,
       ride: profile.ride,
       paint: profile.paint,
     });
@@ -392,160 +168,120 @@ export default function Home() {
   function leaveLobby() {
     socketRef.current?.emit(ClientEvent.LEAVE_QUEUE);
     gameCountdownPlayedRef.current = false;
-    setErrorMessage("");
-    setWaiting({
-      secondsLeft: config.matchmakingSeconds,
-      playerCount: 0,
-      players: [],
-      playerProfiles: [],
-    });
-    setPhase("intro");
+    dispatch({ type: ActionType.LOBBY_LEFT });
   }
 
   function chooseAnswer(option) {
-    if (!question || lockedAnswer || removedOptions.includes(option)) {
+    if (!canChooseAnswer(state, option)) {
       return;
     }
 
     playSoundEffect({ name: "click_possible_answer" });
-    setSelectedOption(option);
-    setLockedAnswer(true);
+    dispatch({ type: ActionType.ANSWER_CHOSEN, option });
     socketRef.current?.emit(ClientEvent.ANSWER, {
-      questionId: question.id,
+      questionId: state.question.id,
       option,
     });
   }
 
-  function useHelp(helpType) {
-    if (!question || lockedAnswer) {
+  function requestHelp(helpType) {
+    if (!canUseHelp(state)) {
       return;
     }
 
     playSoundEffect({ name: "click" });
-    setErrorMessage("");
-    if (helpType === Lifeline.CALL_A_FRIEND) {
-      setFriendPopup({
-        open: true,
-        loading: true,
-        message: "Calling your funniest friend...",
-        confidence: null,
-        friendAnswered: null,
-        kind: "caller_loading",
-      });
-    }
+    dispatch({ type: ActionType.HELP_REQUESTED, helpType });
     socketRef.current?.emit(ClientEvent.USE_HELP, {
-      questionId: question.id,
+      questionId: state.question.id,
       helpType,
     });
   }
 
   function openChat() {
-    if (!gameInfo?.gameId) {
+    const gameId = state.gameInfo?.gameId;
+    if (!gameId) {
       return;
     }
 
-    setChatOpen(true);
-    setChatUnreadCount(0);
-    socketRef.current?.emit(ClientEvent.CHAT_REQUEST_HISTORY, { game_id: gameInfo.gameId });
-    socketRef.current?.emit(ClientEvent.CHAT_OPEN, { game_id: gameInfo.gameId });
+    dispatch({ type: ActionType.CHAT_OPENED });
+    socketRef.current?.emit(ClientEvent.CHAT_REQUEST_HISTORY, { game_id: gameId });
+    socketRef.current?.emit(ClientEvent.CHAT_OPEN, { game_id: gameId });
     scrollChatToBottom();
-  }
-
-  function closeChat() {
-    setChatOpen(false);
   }
 
   function sendChatMessage(event) {
     event.preventDefault();
-    const content = chatInput.trim();
+    const content = state.chatInput.trim();
+    const gameId = state.gameInfo?.gameId;
 
-    if (!content || !gameInfo?.gameId) {
+    if (!content || !gameId) {
       return;
     }
 
     socketRef.current?.emit(ClientEvent.CHAT_SEND_MESSAGE, {
-      game_id: gameInfo.gameId,
+      game_id: gameId,
       content,
     });
-    setChatInput("");
+    dispatch({ type: ActionType.CHAT_MESSAGE_SENT });
   }
 
-  const activeRaceStandings =
-    raceStandings?.players?.length > 0
-      ? raceStandings
-      : gameInfo?.raceStandings || EMPTY_RACE_STANDINGS;
-
-  if (phase === "intro") {
+  if (phase === Phase.INTRO) {
     return (
       <WelcomePage
-        errorMessage={errorMessage}
-        onPlayerNameChange={setPlayerName}
+        errorMessage={state.errorMessage}
+        onPlayerNameChange={(name) => dispatch({ type: ActionType.PLAYER_NAME_CHANGED, name })}
         onStart={joinQueue}
         playClickSound={() => playSoundEffect({ name: "click" })}
-        playerName={playerName}
+        playerName={state.playerName}
       />
     );
   }
 
-  if (phase === "waiting") {
+  if (phase === Phase.WAITING) {
     return (
       <MatchmakingPage
-        currentPlayerId={currentPlayerId}
-        errorMessage={errorMessage}
-        matchmakingSeconds={config.matchmakingSeconds}
+        currentPlayerId={state.currentPlayerId}
+        errorMessage={state.errorMessage}
+        matchmakingSeconds={state.config.matchmakingSeconds}
         onLeave={leaveLobby}
-        waiting={waiting}
+        waiting={state.waiting}
       />
     );
   }
 
   return (
     <GamePage
-      chatInput={chatInput}
+      chatInput={state.chatInput}
       chatListRef={chatListRef}
-      chatMessages={chatMessages}
-      chatOpen={chatOpen}
-      chatUnreadCount={chatUnreadCount}
-      config={config}
-      connectionStatus={connectionStatus}
-      currentPlayerId={currentPlayerId}
-      doubleScoreActive={doubleScoreActive}
-      errorMessage={errorMessage}
-      friendPopup={friendPopup}
-      gameInfo={gameInfo}
-      helps={helps}
-      leaderboard={leaderboard}
-      lockedAnswer={lockedAnswer}
-      onChatInputChange={setChatInput}
+      chatMessages={state.chatMessages}
+      chatOpen={state.chatOpen}
+      chatUnreadCount={state.chatUnreadCount}
+      config={state.config}
+      connectionStatus={state.connectionStatus}
+      currentPlayerId={state.currentPlayerId}
+      doubleScoreActive={state.doubleScoreActive}
+      errorMessage={state.errorMessage}
+      friendPopup={state.friendPopup}
+      gameInfo={state.gameInfo}
+      helps={state.helps}
+      leaderboard={state.leaderboard}
+      lockedAnswer={state.lockedAnswer}
+      onChatInputChange={(text) => dispatch({ type: ActionType.CHAT_INPUT_CHANGED, text })}
       onChooseAnswer={chooseAnswer}
-      onCloseChat={closeChat}
-      onCloseFriendPopup={() =>
-        setFriendPopup({
-          open: false,
-          loading: false,
-          message: "",
-          confidence: null,
-          friendAnswered: null,
-          kind: "",
-        })
-      }
+      onCloseChat={() => dispatch({ type: ActionType.CHAT_CLOSED })}
+      onCloseFriendPopup={() => dispatch({ type: ActionType.FRIEND_POPUP_CLOSED })}
       onOpenChat={openChat}
-      onPlayAgain={() => {
-        setRaceStandings(EMPTY_RACE_STANDINGS);
-        setPreviousRaceStandings(EMPTY_RACE_STANDINGS);
-        settledRaceStandingsRef.current = EMPTY_RACE_STANDINGS;
-        setPhase("intro");
-      }}
+      onPlayAgain={() => dispatch({ type: ActionType.PLAY_AGAIN })}
       onSendChatMessage={sendChatMessage}
-      onUseHelp={useHelp}
+      onUseHelp={requestHelp}
       phase={phase}
-      previousRaceStandings={previousRaceStandings}
-      question={question}
-      raceStandings={activeRaceStandings}
-      removedOptions={removedOptions}
-      result={result}
-      selectedOption={selectedOption}
-      timeLeft={timeLeft}
+      previousRaceStandings={state.previousRaceStandings}
+      question={state.question}
+      raceStandings={selectRaceStandings(state)}
+      removedOptions={state.removedOptions}
+      result={state.result}
+      selectedOption={state.selectedOption}
+      timeLeft={state.timeLeft}
     />
   );
 }
