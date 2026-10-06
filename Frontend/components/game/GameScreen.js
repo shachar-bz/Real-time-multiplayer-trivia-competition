@@ -101,6 +101,7 @@ export default function GameScreen({
       {phase === Phase.RESULT && result && (
         <RoundResult
           currentPlayerId={currentPlayerId}
+          key={result.questionId}
           leaderboard={leaderboard}
           myResult={myResult}
           previousRaceStandings={previousRaceStandings}

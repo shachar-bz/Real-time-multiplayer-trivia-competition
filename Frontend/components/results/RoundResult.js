@@ -19,7 +19,10 @@ function scoreLabel(score) {
   return `${safeScore} pt${safeScore === 1 ? "" : "s"}`;
 }
 
-/** After each question: the correct answer, your points, and every racer driving forward. */
+/**
+ * After each question: the correct answer, your points, and every racer driving forward.
+ * Render it with `key={result.questionId}` so each round starts from the old positions.
+ */
 export default function RoundResult({
   currentPlayerId,
   leaderboard,
@@ -41,14 +44,15 @@ export default function RoundResult({
     [previousRaceStandings]
   );
 
+  // Paint the lanes at last round's positions first, then move them on the next
+  // frame so the CSS transition animates the drive forward.
   useEffect(() => {
-    setAnimateForward(false);
     const animationFrame = window.requestAnimationFrame(() => {
       setAnimateForward(true);
     });
 
     return () => window.cancelAnimationFrame(animationFrame);
-  }, [result.questionId]);
+  }, []);
 
   return (
     <section className={cx(styles.panel, styles.resultPage)} aria-label="Round result">
