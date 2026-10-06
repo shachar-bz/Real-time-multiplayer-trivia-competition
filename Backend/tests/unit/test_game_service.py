@@ -12,14 +12,20 @@ from trivia.domain.lifelines import Lifeline
 from trivia.domain.match import LIFELINE_ALREADY_USED
 from trivia.domain.players import Player
 from trivia.services.chat_service import ChatService
-from trivia.services.game_service import FRIEND_NOT_ANSWERING, GameService
+from trivia.services.game_service import (
+    FRIEND_NOT_ANSWERING,
+    MATCH_COULD_NOT_START,
+    GameService,
+)
 from trivia.services.registry import GameRegistry
 
 
 class Game:
     """A GameService wired to fakes, plus helpers to drive one match."""
 
-    def __init__(self, tmp_path, *, question_seconds=5.0, friend=None, friend_timeout=1.0):
+    def __init__(
+        self, tmp_path, *, question_seconds=5.0, friend=None, friend_timeout=1.0, questions=None
+    ):
         self.events = RecordingEvents()
         self.registry = GameRegistry()
         self.friend = friend or FakeFriendAdvisor()
@@ -29,7 +35,9 @@ class Game:
         self.service = GameService(
             events=self.events,
             registry=self.registry,
-            question_bank=FakeQuestionBank([make_question(1, "C"), make_question(2, "A")]),
+            question_bank=FakeQuestionBank(
+                questions or [make_question(1, "C"), make_question(2, "A")]
+            ),
             friend_advisor=self.friend,
             chat=chat,
             question_seconds=question_seconds,
@@ -105,6 +113,17 @@ async def test_a_match_plays_every_question_and_then_cleans_up(game):
     ]  # fmt: skip
     assert len(game.registry) == 0 and not game.registry.is_playing("alice")
     assert game.match.players["alice"].score > game.match.players["bob"].score > 0
+
+
+async def test_players_are_told_when_their_match_cannot_start(tmp_path):
+    game = Game(tmp_path, questions=[make_question(1)])  # a match needs two
+    await game.service.start_match([alice(), bot(delay_seconds=0.01), bob()])
+
+    assert game.events.calls == [
+        ("error", "alice", MATCH_COULD_NOT_START),
+        ("error", "bob", MATCH_COULD_NOT_START),
+    ]
+    assert len(game.registry) == 0 and not game.registry.is_playing("alice")
 
 
 async def test_a_round_waits_for_the_timer_when_someone_does_not_answer(tmp_path):

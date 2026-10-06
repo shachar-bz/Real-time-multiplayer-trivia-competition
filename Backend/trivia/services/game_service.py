@@ -34,6 +34,7 @@ from trivia.services.registry import GameRegistry
 logger = logging.getLogger(__name__)
 
 FRIEND_NOT_ANSWERING = "friend is not answering right now"
+MATCH_COULD_NOT_START = "The game could not start. Please try again."
 
 
 @dataclass(eq=False)
@@ -80,7 +81,20 @@ class GameService:
     # Starting and running a match -------------------------------------------
 
     async def start_match(self, lineup: list[Player]) -> None:
-        questions = await self._question_bank.draw(self._questions_per_game)
+        """Start a match for the lineup, or tell its players that it could not start.
+
+        The questions are drawn before the match exists, so a failure leaves
+        nothing half-started and the players are free to queue again.
+        """
+        try:
+            questions = await self._question_bank.draw(self._questions_per_game)
+        except Exception:
+            logger.exception("Could not start a match for %s", [p.name for p in lineup])
+            for player in lineup:
+                if not player.is_bot:
+                    await self._events.error(player.id, MATCH_COULD_NOT_START)
+            return
+
         match = Match(
             str(uuid.uuid4()),
             lineup,
