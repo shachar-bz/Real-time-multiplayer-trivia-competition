@@ -3,6 +3,7 @@ import pytest
 from tests.fakes import FakeClock, RecordingEvents, make_question
 from trivia.adapters.sqlite_chat import SqliteChatStore
 from trivia.domain.bots import BotBrain, DifficultyProfile
+from trivia.domain.chat import MAX_MESSAGE_LENGTH
 from trivia.domain.match import Match
 from trivia.domain.players import Player
 from trivia.services.chat_service import ChatService
@@ -46,6 +47,38 @@ async def test_a_message_reaches_the_match_and_counts_as_unread_for_other_humans
 async def test_messages_outside_a_match_are_ignored(chat, player_id, game_id, content):
     await chat.service.send_message(player_id, game_id, content)
     assert chat.events.calls == []
+
+
+@pytest.mark.parametrize(
+    "content",
+    ["", "   \n ", 42, ["hi"], {"text": "hi"}, "x" * (MAX_MESSAGE_LENGTH + 1)],
+    ids=["empty", "whitespace", "number", "list", "object", "too long"],
+)
+async def test_only_non_empty_text_within_the_limit_is_posted(chat, content):
+    await chat.service.send_message("alice", "game-1", content)
+    assert chat.events.calls == []
+    assert await chat.store.history("game-1") == []
+
+
+async def test_messages_are_posted_without_surrounding_whitespace(chat):
+    await chat.service.send_message("alice", "game-1", "  hello racers \n")
+    await chat.service.send_message("alice", "game-1", "x" * MAX_MESSAGE_LENGTH)
+
+    posted = [message.content for message, _ in chat.events.of("chat_message_posted")]
+    assert posted == ["hello racers", "x" * MAX_MESSAGE_LENGTH]
+
+
+async def test_only_players_of_the_match_can_read_its_chat(chat):
+    await chat.service.send_message("alice", "game-1", "our secret plan")
+    chat.events.calls.clear()
+
+    await chat.service.send_history("stranger", "game-1")
+    await chat.service.open_chat("stranger", "game-1")
+    await chat.service.send_history("alice", "no-such-game")
+    await chat.service.open_chat("alice", ["not", "an", "id"])
+
+    assert chat.events.calls == []
+    assert (await chat.store.add_unread("game-1", ["bob"])) == {"bob": 2}  # untouched
 
 
 async def test_opening_the_chat_clears_unread_messages(chat):
