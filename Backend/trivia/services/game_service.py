@@ -8,6 +8,9 @@ Each match runs in its own task:
         connected has answered or the timer runs out -> round_finished -> pause
     match_finished -> chat closed -> match_closed
 
+When the last human disconnects the match is abandoned: it stops right away
+(no more rounds for the bots alone) and goes straight to closing.
+
 Player requests (answers, lifelines, disconnects) arrive concurrently from the
 socket handlers. They change the Match and then wake the round loop, which
 re-checks whether the round is over. The Match decides what is allowed; this
@@ -138,25 +141,31 @@ class GameService:
         match = running.match
         await self._events.match_started(match)
 
-        while match.start_next_round() is not None:
+        while not match.abandoned and match.start_next_round() is not None:
             await self._events.question_started(match)
             self._schedule_bot_answers(running)
             await self._wait_for_round_end(running)
             self._cancel_bot_answers(running)
             match.close_round()
+            if match.abandoned:
+                break
             await self._events.round_finished(match)
             await asyncio.sleep(self._result_seconds)
 
+        if match.abandoned:
+            logger.info("Match %s abandoned: no player is connected any more", match.id)
+            return
         await self._events.match_finished(match)
         logger.info("Match %s finished, winners: %s", match.id, [p.name for p in match.winners()])
 
     async def _wait_for_round_end(self, running: RunningMatch) -> None:
-        """Sleep until every connected player answered or the (pausable) timer ran out."""
+        """Sleep until every connected player answered, the (pausable) timer ran out,
+        or the last human left."""
         match = running.match
         timer = match.round.timer
         while True:
             running.round_changed.clear()
-            if match.all_connected_players_answered() or timer.expired:
+            if match.abandoned or match.all_connected_players_answered() or timer.expired:
                 return
             timeout = None if timer.paused else timer.remaining()
             with contextlib.suppress(TimeoutError):

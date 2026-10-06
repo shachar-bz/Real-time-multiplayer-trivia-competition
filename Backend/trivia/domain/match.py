@@ -104,6 +104,11 @@ class Match:
     def humans(self) -> list[Player]:
         return [player for player in self.players.values() if not player.is_bot]
 
+    @property
+    def abandoned(self) -> bool:
+        """Every human has disconnected: nobody is left to play against the bots."""
+        return not any(player.connected for player in self.humans)
+
     # Rounds ----------------------------------------------------------------
 
     def start_next_round(self) -> Round | None:

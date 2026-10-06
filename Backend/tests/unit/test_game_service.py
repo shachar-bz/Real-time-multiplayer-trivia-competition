@@ -150,6 +150,35 @@ async def test_disconnected_players_are_not_waited_for(game):
     assert names[names.index("round_finished") - 1] == "standings_changed"  # Bob left
 
 
+async def test_a_match_stops_as_soon_as_no_human_is_connected(tmp_path):
+    game = Game(tmp_path, question_seconds=30)
+    await game.start(alice(), bot(delay_seconds=20))
+    await game.service.player_disconnected("alice")
+    await game.closed()  # instead of letting the bot play on for minutes
+
+    assert game.events.names() == [
+        "match_started",
+        "question_started",
+        "standings_changed",  # Alice left
+        "chat_cleared",
+        "match_closed",
+    ]
+    assert len(game.registry) == 0
+
+
+async def test_a_match_goes_on_while_any_human_is_still_connected(tmp_path):
+    game = Game(tmp_path, question_seconds=30)
+    await game.start(alice(), bob())
+    await game.service.player_disconnected("bob")
+    await game.service.submit_answer("alice", 1, "C")
+    await game.question(2)
+    await game.service.player_disconnected("alice")
+    await game.closed()
+
+    assert len(game.events.of("round_finished")) == 1
+    assert "match_finished" not in game.events.names()
+
+
 async def test_bots_answer_through_the_same_rules_without_answer_feedback(game):
     await game.start(alice(), bot(delay_seconds=0.01))
     await eventually(lambda: game.match.players["bot-1"].score > 0)

@@ -3,6 +3,7 @@ import random
 import pytest
 
 from tests.fakes import FakeClock, make_question
+from trivia.domain.bots import BotBrain, DifficultyProfile
 from trivia.domain.lifelines import Lifeline
 from trivia.domain.match import (
     FRIEND_CALL_IN_PROGRESS,
@@ -178,6 +179,18 @@ def test_nobody_connected_never_counts_as_everyone_answered(match):
     match.mark_disconnected("bob")
     assert not match.all_connected_players_answered()
     assert match.mark_disconnected("stranger") is False
+
+
+def test_a_match_is_abandoned_once_every_human_disconnected(clock):
+    robot = Player.bot("bot-1", "Robo 🤖", "superbike", "blue",
+                       BotBrain(DifficultyProfile("test", 1.0, 0, 0)))  # fmt: skip
+    players = [Player.human("alice", "Alice"), Player.human("bob", "Bob"), robot]
+    match = Match("match-2", players, [make_question()], question_seconds=20, clock=clock)
+
+    match.mark_disconnected("alice")
+    assert not match.abandoned
+    match.mark_disconnected("bob")
+    assert match.abandoned  # the connected bot does not count
 
 
 def test_leaderboard_breaks_ties_alphabetically_and_winners_share_the_top(clock):
