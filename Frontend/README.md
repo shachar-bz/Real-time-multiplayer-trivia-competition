@@ -66,8 +66,11 @@ tests/                node:test suites for lib/
 ## Conventions
 
 - `lib/` never imports React or Next.js, and imports inside it use explicit
-  `.js` extensions so Node can run it without a bundler. Everything else
-  imports through the `@/` alias (`jsconfig.json`).
+  `.js` extensions so Node can run it without a bundler.
+- Imports across folders use the `@/` alias (`jsconfig.json`); files in the
+  same folder, including a component's CSS module, import each other
+  relatively. `tests/` imports `../lib/*.js` relatively because Node does
+  not know the alias.
 - Side effects live in hooks, never in the reducer.
 - Adding a server event: add it to `lib/protocol.js`, add a reducer case and
   a test, then any sound or scroll it needs in `useTriviaGame`.
