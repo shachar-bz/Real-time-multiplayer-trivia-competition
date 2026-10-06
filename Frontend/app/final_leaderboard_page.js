@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { cx, rideFor } from "./race_helpers";
+import { cx, rideFor } from "@/lib/race";
 import styles from "./final_leaderboard_page.module.css";
 
 const PODIUM_ORDER = [1, 0, 2];

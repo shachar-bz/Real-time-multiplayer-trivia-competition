@@ -1,4 +1,4 @@
-import { PAINT_COLORS, RIDES } from "./vehicle_options";
+import { PAINT_COLORS, RIDES } from "./vehicles.js";
 
 export function normalizeChoiceKey(value) {
   return String(value || "")

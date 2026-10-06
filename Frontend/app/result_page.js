@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { cx, paintFor, playersByScore, progressFor, rideFor } from "./race_helpers";
+import { cx, paintFor, playersByScore, progressFor, rideFor } from "@/lib/race";
 import styles from "./game_page.module.css";
 
 function previousPlayerFor(player, previousPlayersById) {

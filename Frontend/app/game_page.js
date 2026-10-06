@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import FinalLeaderboardPage from "./final_leaderboard_page";
 import ResultPage from "./result_page";
-import { cx, paintFor, rideFor } from "./race_helpers";
+import { cx, paintFor, rideFor } from "@/lib/race";
 import styles from "./game_page.module.css";
 
 const HELP_FIFTY_FIFTY = "fifty_fifty";

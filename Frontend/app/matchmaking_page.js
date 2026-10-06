@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { PAINT_COLORS, RIDES } from "./vehicle_options";
+import { PAINT_COLORS, RIDES } from "@/lib/vehicles";
 import styles from "./matchmaking_page.module.css";
 
 const TARGET_GRID_SLOTS = 4;

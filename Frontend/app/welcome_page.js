@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { PAINT_COLORS, RIDES } from "./vehicle_options";
+import { PAINT_COLORS, RIDES } from "@/lib/vehicles";
 import styles from "./welcome_page.module.css";
 
 const CLICK_SOUND_URL = "http://localhost:8080/sounds/click.mp3";
