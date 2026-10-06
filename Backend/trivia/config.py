@@ -20,6 +20,7 @@ class Settings:
     port: int = 8080
     # "*" or a list of origins. The original server allowed every origin.
     cors_allowed_origins: str | list[str] = "*"
+    log_level: str = "INFO"
 
     question_db_path: Path = DATA_DIR / "trivia.db"
     questions_csv_path: Path = DATA_DIR / "questions.csv"
@@ -46,6 +47,7 @@ class Settings:
             host=os.getenv("HOST", defaults.host),
             port=int(os.getenv("PORT", defaults.port)),
             cors_allowed_origins=_parse_origins(os.getenv("CORS_ALLOWED_ORIGINS")),
+            log_level=os.getenv("LOG_LEVEL", defaults.log_level).strip().upper(),
             question_db_path=_path_from_env("TRIVIA_DB_PATH", defaults.question_db_path),
             questions_csv_path=_path_from_env("QUESTIONS_CSV_PATH", defaults.questions_csv_path),
             chat_db_path=_path_from_env("CHAT_DB_PATH", defaults.chat_db_path),

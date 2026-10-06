@@ -16,9 +16,16 @@ The code is split into layers, and dependencies only point one way:
 `trivia.app.create_app` is the composition root that wires them together.
 """
 
+import logging
+
+LOG_FORMAT = "%(asctime)s %(levelname)s %(name)s: %(message)s"
+
 
 def main() -> None:
     """Run the server (`python server.py` or `python -m trivia`)."""
     from trivia.app import run_server
+    from trivia.config import Settings
 
-    run_server()
+    settings = Settings.from_env()
+    logging.basicConfig(level=settings.log_level, format=LOG_FORMAT)
+    run_server(settings)

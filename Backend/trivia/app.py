@@ -5,7 +5,6 @@ outside world (questions, chat storage, the phone-a-friend model, randomness,
 bot speed) through `create_app`'s keyword arguments.
 """
 
-import logging
 import random
 import time
 from dataclasses import dataclass
@@ -125,9 +124,6 @@ def create_app(
     return app
 
 
-def run_server(settings: Settings | None = None) -> None:
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
-    )
-    settings = settings or Settings.from_env()
+def run_server(settings: Settings) -> None:
+    """Serve until interrupted (Ctrl+C)."""
     web.run_app(create_app(settings), host=settings.host, port=settings.port)
