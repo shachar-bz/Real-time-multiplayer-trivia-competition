@@ -12,7 +12,7 @@ SOUNDS_ROUTE = "/sounds"
 
 
 class Sound(StrEnum):
-    SUBMIT_ANSWER = "submit_answer"  # to the match room, whenever a player answers
+    SUBMIT_ANSWER = "submit_answer"  # to the match room when a human answers (bots are silent)
     CHAT_MESSAGE = "chat_message"  # to the match room except the sender
     WIN_GAME = "win_game"  # to each winner
 
