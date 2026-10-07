@@ -571,6 +571,21 @@ describe("server events", () => {
       const state = reduce(before, error);
       assert.equal(state.errorMessage, "You already used that help.");
       assert.deepEqual(state.friendPopup, before.friendPopup);
+      assert.equal(state.phase, before.phase);
+    });
+
+    test("in the lobby, returns to the welcome screen with the message and an empty lobby", () => {
+      const state = reduce(
+        {
+          ...initialState,
+          phase: Phase.WAITING,
+          waiting: { secondsLeft: 0, playerCount: 2, players: ["A", "B"], playerProfiles: [{}, {}] },
+        },
+        server(ServerEvent.ERROR_MESSAGE, { message: "The game could not start. Please try again." })
+      );
+      assert.equal(state.phase, Phase.INTRO);
+      assert.equal(state.errorMessage, "The game could not start. Please try again.");
+      assert.deepEqual(state.waiting, { secondsLeft: 30, playerCount: 0, players: [], playerProfiles: [] });
     });
   });
 });

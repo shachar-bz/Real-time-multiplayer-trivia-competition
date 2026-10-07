@@ -146,6 +146,19 @@ export const initialState = {
   ...RESET_CHAT,
 };
 
+/** Leave the lobby: an empty waiting room and the welcome screen. */
+function backToWelcome(state) {
+  return {
+    waiting: {
+      secondsLeft: state.config.matchmakingSeconds,
+      playerCount: 0,
+      players: [],
+      playerProfiles: [],
+    },
+    phase: Phase.INTRO,
+  };
+}
+
 export function gameReducer(state, action) {
   switch (action.type) {
     // ---- socket lifecycle and clock --------------------------------------
@@ -310,12 +323,16 @@ export function gameReducer(state, action) {
       };
     }
 
-    case ServerEvent.ERROR_MESSAGE:
-      return {
+    case ServerEvent.ERROR_MESSAGE: {
+      const withError = {
         ...state,
         errorMessage: action.payload.message,
         friendPopup: state.friendPopup.loading ? CLOSED_FRIEND_POPUP : state.friendPopup,
       };
+      // In the lobby, any error means we are not (or no longer) queued, e.g. the
+      // name was rejected or the match could not start: back to the welcome screen.
+      return state.phase === Phase.WAITING ? { ...withError, ...backToWelcome(state) } : withError;
+    }
 
     // ---- player actions --------------------------------------------------
 
@@ -347,17 +364,7 @@ export function gameReducer(state, action) {
     }
 
     case ActionType.LOBBY_LEFT:
-      return {
-        ...state,
-        errorMessage: "",
-        waiting: {
-          secondsLeft: state.config.matchmakingSeconds,
-          playerCount: 0,
-          players: [],
-          playerProfiles: [],
-        },
-        phase: Phase.INTRO,
-      };
+      return { ...state, errorMessage: "", ...backToWelcome(state) };
 
     case ActionType.ANSWER_CHOSEN:
       return { ...state, selectedOption: action.option, lockedAnswer: true };
