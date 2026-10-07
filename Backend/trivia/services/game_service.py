@@ -87,8 +87,11 @@ class GameService:
         """Start a match for the lineup, or tell its players that it could not start.
 
         The questions are drawn before the match exists, so a failure leaves
-        nothing half-started and the players are free to queue again.
+        nothing half-started and the players are free to queue again. While
+        they are drawn the lineup is held in the registry: its players cannot
+        queue twice, and a disconnect in that window is not lost.
         """
+        self._registry.hold(lineup)
         try:
             questions = await self._question_bank.draw(self._questions_per_game)
         except Exception:
@@ -96,6 +99,12 @@ class GameService:
             for player in lineup:
                 if not player.is_bot:
                     await self._events.error(player.id, MATCH_COULD_NOT_START)
+            return
+        finally:
+            self._registry.release(lineup)
+
+        if not any(player.connected for player in lineup if not player.is_bot):
+            logger.info("Match for %s not started: everyone left", [p.name for p in lineup])
             return
 
         match = Match(
@@ -230,6 +239,11 @@ class GameService:
             await self._events.lifeline_used(used)
 
     async def player_disconnected(self, player_id: str) -> None:
+        starting = self._registry.starting_player(player_id)
+        if starting is not None:
+            starting.connected = False  # their match is being set up; it starts without them
+            return
+
         running = self._running_match_of(player_id)
         if running is None or not running.match.mark_disconnected(player_id):
             return

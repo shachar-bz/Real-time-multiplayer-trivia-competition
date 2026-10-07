@@ -31,12 +31,18 @@ def make_question(question_id: int = 1, correct_option: str = "C") -> Question:
 
 
 class FakeQuestionBank:
-    """Hands out the given questions in order."""
+    """Hands out the given questions in order.
+
+    Clear `ready` to keep `draw` waiting, e.g. to act while a match is being set up.
+    """
 
     def __init__(self, questions: list[Question]):
         self.questions = questions
+        self.ready = asyncio.Event()
+        self.ready.set()
 
     async def draw(self, count: int) -> list[Question]:
+        await self.ready.wait()
         if len(self.questions) < count:
             raise NotEnoughQuestionsError(f"Expected at least {count} questions.")
         return self.questions[:count]

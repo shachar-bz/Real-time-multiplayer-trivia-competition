@@ -32,12 +32,13 @@ class Game:
         chat = ChatService(
             store=SqliteChatStore(tmp_path / "chat.db"), registry=self.registry, events=self.events
         )
+        self.questions = FakeQuestionBank(
+            questions or [make_question(1, "C"), make_question(2, "A")]
+        )
         self.service = GameService(
             events=self.events,
             registry=self.registry,
-            question_bank=FakeQuestionBank(
-                questions or [make_question(1, "C"), make_question(2, "A")]
-            ),
+            question_bank=self.questions,
             friend_advisor=self.friend,
             chat=chat,
             question_seconds=question_seconds,
@@ -123,6 +124,36 @@ async def test_players_are_told_when_their_match_cannot_start(tmp_path):
         ("error", "alice", MATCH_COULD_NOT_START),
         ("error", "bob", MATCH_COULD_NOT_START),
     ]
+    assert len(game.registry) == 0 and not game.registry.is_playing("alice")
+
+
+async def test_a_disconnect_while_the_match_is_being_set_up_is_not_lost(tmp_path):
+    game = Game(tmp_path)
+    game.questions.ready.clear()  # hold the question draw open
+    starting = asyncio.create_task(game.service.start_match([alice(), bob()]))
+    await eventually(lambda: game.registry.is_playing("alice"))  # can't queue twice meanwhile
+
+    await game.service.player_disconnected("bob")
+    game.questions.ready.set()
+    await starting
+    await game.question(1)
+
+    match = game.registry.match_for_player("alice")
+    assert not match.players["bob"].connected  # so rounds won't wait for him
+    await game.service.shutdown()
+
+
+async def test_a_match_whose_players_all_left_during_setup_never_starts(tmp_path):
+    game = Game(tmp_path)
+    game.questions.ready.clear()
+    starting = asyncio.create_task(game.service.start_match([alice(), bot(delay_seconds=0.01)]))
+    await eventually(lambda: game.registry.is_playing("alice"))
+
+    await game.service.player_disconnected("alice")
+    game.questions.ready.set()
+    await starting
+
+    assert game.events.calls == []
     assert len(game.registry) == 0 and not game.registry.is_playing("alice")
 
 
