@@ -1,6 +1,7 @@
 """The question pipeline's pure helpers. No LLM is called."""
 
 import csv
+import importlib
 
 import pytest
 
@@ -8,6 +9,7 @@ from tools.question_bank import csv_store
 from tools.question_bank.check_answers import get_wrong_question_ids, parse_model_answers
 from tools.question_bank.dedupe_questions import get_ids_to_delete
 from tools.question_bank.generate_questions import validate_question
+from trivia.config import Settings
 
 
 def question_row(question_id, question="What?", correct_option="A"):
@@ -130,3 +132,14 @@ def test_a_generated_question_becomes_a_csv_row():
 
     with pytest.raises(ValueError, match="topic"):
         validate_question(raw, "Music", question_id=42)
+
+
+def test_the_pipeline_edits_the_csv_the_server_reads(monkeypatch):
+    monkeypatch.setenv("QUESTIONS_CSV_PATH", "data/custom_questions.csv")
+    try:
+        configured = importlib.reload(csv_store).QUESTIONS_CSV_PATH
+        assert configured == Settings.from_env().questions_csv_path
+        assert configured.name == "custom_questions.csv"
+    finally:
+        monkeypatch.delenv("QUESTIONS_CSV_PATH")
+        importlib.reload(csv_store)

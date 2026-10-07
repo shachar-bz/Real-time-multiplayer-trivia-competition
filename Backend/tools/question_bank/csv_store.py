@@ -8,9 +8,10 @@ same numbering the game database is built with.
 import csv
 from pathlib import Path
 
-from trivia.config import DATA_DIR
+from trivia.config import Settings
 
-QUESTIONS_CSV_PATH = DATA_DIR / "questions.csv"
+# The same CSV the server seeds its database from (QUESTIONS_CSV_PATH in .env).
+QUESTIONS_CSV_PATH = Settings.from_env().questions_csv_path
 QUESTION_FIELDS = [
     "id",
     "topic",
