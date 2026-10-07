@@ -100,9 +100,7 @@ class SqliteQuestionBank:
         if self.seed_csv_path is None:
             raise FileNotFoundError(f"No questions in {self.db_path} and no CSV to build from.")
 
-        count = await asyncio.to_thread(
-            build_question_database, self.seed_csv_path, self.db_path
-        )
+        count = await asyncio.to_thread(build_question_database, self.seed_csv_path, self.db_path)
         logger.info("Built %s with %d questions from %s", self.db_path, count, self.seed_csv_path)
 
     async def draw(self, count: int) -> list[Question]:

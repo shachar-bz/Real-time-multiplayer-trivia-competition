@@ -4,8 +4,13 @@ import time
 
 import pytest
 
-from tests.fakes import FakeFriendAdvisor, FakeQuestionBank, RecordingEvents, eventually
-from tests.fakes import make_question
+from tests.fakes import (
+    FakeFriendAdvisor,
+    FakeQuestionBank,
+    RecordingEvents,
+    eventually,
+    make_question,
+)
 from trivia.adapters.sqlite_chat import SqliteChatStore
 from trivia.domain.bots import BotBrain, DifficultyProfile
 from trivia.domain.lifelines import Lifeline

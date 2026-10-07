@@ -52,10 +52,7 @@ Because there are multiple questions, return one answer per line in the same ord
 
 
 def chunk_questions(questions: list[dict], chunk_size: int) -> list[list[dict]]:
-    return [
-        questions[index:index + chunk_size]
-        for index in range(0, len(questions), chunk_size)
-    ]
+    return [questions[index : index + chunk_size] for index in range(0, len(questions), chunk_size)]
 
 
 def build_questions_prompt(questions: list[dict]) -> str:
@@ -76,11 +73,7 @@ def build_questions_prompt(questions: list[dict]) -> str:
 
     questions_text = "\n\n".join(question_blocks)
     prompt = ANSWER_SELECTOR_PROMPT.format(questions_per_call=len(questions))
-    return (
-        f"{prompt}\n\n"
-        f"Questions:\n\n"
-        f"{questions_text}"
-    )
+    return f"{prompt}\n\nQuestions:\n\n{questions_text}"
 
 
 def parse_model_answers(raw_answer: str, expected_answers_count: int) -> list[str]:
@@ -89,9 +82,7 @@ def parse_model_answers(raw_answer: str, expected_answers_count: int) -> list[st
 
     if len(answers) != expected_answers_count:
         compact_answers = [
-            character
-            for character in cleaned_answer
-            if character in {"A", "B", "C", "D"}
+            character for character in cleaned_answer if character in {"A", "B", "C", "D"}
         ]
         answers = compact_answers
 
@@ -138,13 +129,13 @@ def call_answer_model(
 def get_wrong_question_ids(questions: list[dict], model_answers: list[str]) -> list[int]:
     wrong_question_ids = []
 
-    for question, model_answer in zip(questions, model_answers):
+    for question, model_answer in zip(questions, model_answers, strict=True):
         correct_option = question["correct_option"].strip().upper()
         if model_answer != correct_option:
             wrong_question_ids.append(int(question["id"]))
             print(
-                f'Deleted question {question["id"]}: {question["question"]} '
-                f'(model answered {model_answer}, correct answer is {correct_option})'
+                f"Deleted question {question['id']}: {question['question']} "
+                f"(model answered {model_answer}, correct answer is {correct_option})"
             )
 
     return wrong_question_ids

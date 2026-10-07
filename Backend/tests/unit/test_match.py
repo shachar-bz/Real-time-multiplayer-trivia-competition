@@ -200,7 +200,7 @@ def test_leaderboard_breaks_ties_alphabetically_and_winners_share_the_top(clock)
         Player.human("3", "alice"),
         Player.human("4", "Dave"),
     ]
-    for player, score in zip(players, [500, 900, 900, 100]):
+    for player, score in zip(players, [500, 900, 900, 100], strict=True):
         player.score = score
     match = Match("m", players, [make_question()], question_seconds=20, clock=clock)
 

@@ -151,9 +151,7 @@ def generate_questions(
         batch = data.get("questions", [])
 
         if len(batch) != batch_size:
-            raise ValueError(
-                f"Expected {batch_size} questions for {topic}, got {len(batch)}."
-            )
+            raise ValueError(f"Expected {batch_size} questions for {topic}, got {len(batch)}.")
 
         rows = []
         for raw_question in batch:

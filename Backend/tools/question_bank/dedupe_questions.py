@@ -115,7 +115,7 @@ def print_deleted_questions(ids_to_delete: list[int], questions: list[dict]) -> 
 
     for question in questions:
         if question["id"] in ids_to_delete_set:
-            print(f'Deleted question {question["id"]}: {question["question"]}')
+            print(f"Deleted question {question['id']}: {question['question']}")
 
 
 def dedupe_questions() -> None:
